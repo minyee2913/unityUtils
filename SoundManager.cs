@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace minyee2913.Utils {
@@ -5,9 +6,24 @@ namespace minyee2913.Utils {
     {
         const string path = "Sounds/";
         public const int trackSize = 4;
-        void Start()
+
+        Dictionary<string, AudioClip> caches = new();
+        [SerializeField]
+        List<AudioSource> tracks = new();
+
+        void Awake()
         {
-            
+            for (int i = 0; i < trackSize; i++) {
+                InstantiateTrack();
+            }
+        }
+
+        void InstantiateTrack() {
+            GameObject obj = new GameObject("track" + (tracks.Count + 1).ToString());
+            obj.transform.SetParent(transform);
+
+            AudioSource source = obj.AddComponent<AudioSource>();
+            tracks.Add(source);
         }
 
         // Update is called once per frame
@@ -16,6 +32,36 @@ namespace minyee2913.Utils {
             
         }
 
-        public void PlaySound(string sound, int track, float volume = 1, float pith = 1) {}
+        AudioClip GetClip(string sound) {
+            if (caches.ContainsKey(sound)) {
+                return caches[sound];
+            }
+
+            AudioClip clip = Resources.Load<AudioClip>(path + sound);
+
+            if (clip != null) {
+                caches[sound] = clip;
+            }
+
+            return clip;
+        }
+
+        public void PlaySound(string sound, int track, float volume = 1, float pitch = 1, bool loop = false, float startTime = 0) {
+            AudioClip clip = GetClip(sound);
+
+            AudioSource _audio = tracks[track - 1];
+
+            _audio.clip = clip;
+            _audio.loop = loop;
+            _audio.volume = volume;
+            _audio.pitch = pitch;
+            _audio.time = startTime;
+
+            if (pitch != 0) {
+                _audio.pitch = pitch;
+            }
+            
+            _audio.Play();
+        }
     }
 }
