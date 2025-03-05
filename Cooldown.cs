@@ -1,28 +1,30 @@
 using System;
 
-class Cooldown {
-    bool isIn;
-    public float time;
-    public DateTime startTime;
-    public Cooldown(float time) {
-        this.time = time;
-    }
+namespace minyee2913.Utils {
+    class Cooldown {
+        bool isIn;
+        public float time;
+        public DateTime startTime;
+        public Cooldown(float time) {
+            this.time = time;
+        }
 
-    public void Start() {
-        startTime = DateTime.Now;
+        public void Start() {
+            startTime = DateTime.Now;
 
-        isIn = true;
-    }
+            isIn = true;
+        }
 
-    public bool IsIn() {
-        if (isIn) {
-            if (startTime.AddSeconds(time) < DateTime.Now) {
-                return false;
+        public bool IsIn() {
+            if (isIn) {
+                if (startTime.AddSeconds(time) < DateTime.Now) {
+                    return false;
+                } else {
+                    return true;
+                }
             } else {
-                return true;
+                return false;
             }
-        } else {
-            return false;
         }
     }
 }
