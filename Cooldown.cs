@@ -15,6 +15,12 @@ namespace minyee2913.Utils {
             isIn = true;
         }
 
+        public float timeLeft() {
+            var t = startTime.AddMilliseconds(time * 1000);
+            DateTime now = DateTime.Now;
+            return (float)(t.Millisecond - now.Millisecond) / 1000;
+        }
+
         public bool IsIn() {
             if (isIn) {
                 if (startTime.AddSeconds(time) < DateTime.Now) {
