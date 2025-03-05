@@ -30,7 +30,7 @@ namespace minyee2913.Utils {
                 } else {
                     DontDestroyOnLoad(gameObject);
                 }
-            }   
+            }
         }
     }
 }
