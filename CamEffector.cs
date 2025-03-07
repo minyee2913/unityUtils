@@ -22,7 +22,7 @@ namespace minyee2913.Utils {
         }
         CinemachineCameraOffset offset;
         CinemachineBasicMultiChannelPerlin noise;
-        const float frame = 60;
+        const float frame = 30;
         float orSize_d;
         float dutch_d;
         IEnumerator dutchRoutine = null;
@@ -57,6 +57,9 @@ namespace minyee2913.Utils {
         }
 
         public void CloseUp(float orSize, float dutch, float dur = 0) {
+            if (orSize < 0) {
+                orSize += dutch_d;
+            }
             ClearRoutine(dutchRoutine);
             dutchRoutine = _closeUp(orSize, dutch, dur);
 
