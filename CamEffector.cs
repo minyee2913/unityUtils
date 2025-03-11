@@ -22,7 +22,6 @@ namespace minyee2913.Utils {
         }
         CinemachineCameraOffset offset;
         CinemachineBasicMultiChannelPerlin noise;
-        float frame = 20;
         bool inCloseUp, inViewUp;
         float orSize_d;
         float view_d;
@@ -108,7 +107,6 @@ namespace minyee2913.Utils {
 
         IEnumerator _closeUp(float orSize, float dutch, float dur) {
             if (!inCloseUp) {
-                // 초기 값 저장
                 orSize_d = cam.Lens.OrthographicSize;
                 dutch_d = cam.Lens.Dutch;
 
@@ -122,12 +120,12 @@ namespace minyee2913.Utils {
                 float elapsedTime = 0f;
 
                 while (elapsedTime < dur) {
-                    float t = elapsedTime / dur; // 보간 값 계산
+                    float t = elapsedTime / dur;
                     cam.Lens.OrthographicSize = Mathf.Lerp(dSize, orSize, t);
                     cam.Lens.Dutch = Mathf.Lerp(dDutch, dutch, t);
 
                     elapsedTime += Time.deltaTime;
-                    yield return null; // 다음 프레임을 기다림
+                    yield return null;
                 }
 
                 
@@ -141,7 +139,6 @@ namespace minyee2913.Utils {
 
         IEnumerator _viewUp(float fov, float dutch, float dur) {
             if (!inViewUp) {
-                // 초기 값 저장
                 view_d = cam.Lens.FieldOfView;
                 dutch_view_d = cam.Lens.Dutch;
 
@@ -155,12 +152,13 @@ namespace minyee2913.Utils {
                 float elapsedTime = 0f;
 
                 while (elapsedTime < dur) {
-                    float t = elapsedTime / dur; // 보간 값 계산
+                    float t = elapsedTime / dur;
                     cam.Lens.FieldOfView = Mathf.Lerp(dSize, fov, t);
                     cam.Lens.Dutch = Mathf.Lerp(dDutch, dutch, t);
 
                     elapsedTime += Time.deltaTime;
-                    yield return null; // 다음 프레임을 기다림
+
+                    yield return null;
                 }
             }
 
@@ -178,11 +176,12 @@ namespace minyee2913.Utils {
                 float elapsedTime = 0f;
 
                 while (elapsedTime < dur) {
-                    float t = elapsedTime / dur; // 보간 값 계산
+                    float t = elapsedTime / dur;
                     cam.Lens.FieldOfView = Mathf.Lerp(dSize, view_d, t);
                     cam.Lens.Dutch = Mathf.Lerp(dDutch, dutch_view_d, t);
 
                     elapsedTime += Time.deltaTime;
+
                     yield return null;
                 }
             }
@@ -202,11 +201,12 @@ namespace minyee2913.Utils {
                 float elapsedTime = 0f;
 
                 while (elapsedTime < dur) {
-                    float t = elapsedTime / dur; // 보간 값 계산
+                    float t = elapsedTime / dur;
                     cam.Lens.OrthographicSize = Mathf.Lerp(dSize, orSize_d, t);
                     cam.Lens.Dutch = Mathf.Lerp(dDutch, dutch_d, t);
 
                     elapsedTime += Time.deltaTime;
+
                     yield return null;
                 }
             }
