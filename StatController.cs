@@ -25,6 +25,8 @@ namespace minyee2913.Utils {
         Dictionary<string, float> statBase = new();
         Dictionary<string, float> statResult = new();
         Dictionary<string, Buf> bufs = new();
+        [SerializeField]
+        List<StatBaseField> overrideFields;
 
         void Awake()
         {
@@ -42,6 +44,10 @@ namespace minyee2913.Utils {
 
         public void ConstructBase(StatBaseConstructor constructor) {
             foreach (StatBaseField field in constructor.fields) {
+                statBase[field.key] = field.defaultValue;
+            }
+
+            foreach (StatBaseField field in overrideFields) {
                 statBase[field.key] = field.defaultValue;
             }
         }

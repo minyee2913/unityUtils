@@ -22,9 +22,12 @@ namespace minyee2913.Utils {
         }
         CinemachineCameraOffset offset;
         CinemachineBasicMultiChannelPerlin noise;
-        const float frame = 30;
+        float frame = 20;
+        bool inCloseUp, inViewUp;
         float orSize_d;
+        float view_d;
         float dutch_d;
+        float dutch_view_d;
         IEnumerator dutchRoutine = null;
         IEnumerator offRoutine = null;
 
@@ -37,6 +40,10 @@ namespace minyee2913.Utils {
             noise.NoiseProfile = Resources.Load<NoiseSettings>("noise_profile/6D Wobble");
             noise.AmplitudeGain = 0;
             noise.FrequencyGain = 0;
+
+            orSize_d = cam.Lens.OrthographicSize;
+            dutch_d = dutch_view_d = cam.Lens.Dutch;
+            view_d = cam.Lens.FieldOfView;
         }
 
         void Start() {
@@ -48,7 +55,7 @@ namespace minyee2913.Utils {
             effectors.Remove(this);
         }
 
-        void ClearRoutine(IEnumerator routine) {
+        void ClearRoutine(ref IEnumerator routine) {
             if (routine != null) {
                 StopCoroutine(routine);
 
@@ -58,21 +65,36 @@ namespace minyee2913.Utils {
 
         public void CloseUp(float orSize, float dutch, float dur = 0) {
             if (orSize < 0) {
-                orSize += dutch_d;
+                orSize += orSize_d;
             }
-            ClearRoutine(dutchRoutine);
+            ClearRoutine(ref dutchRoutine);
             dutchRoutine = _closeUp(orSize, dutch, dur);
 
             StartCoroutine(dutchRoutine);
         }
+        public void ViewUp(float fov, float dutch, float dur = 0) {
+            if (fov < 0) {
+                fov += view_d;
+            }
+            ClearRoutine(ref dutchRoutine);
+            dutchRoutine = _viewUp(fov, dutch, dur);
+
+            StartCoroutine(dutchRoutine);
+        }
+        public void ViewOut(float dur = 0) {
+            ClearRoutine(ref dutchRoutine);
+            dutchRoutine = _viewOut(dur);
+
+            StartCoroutine(dutchRoutine);
+        }
         public void CloseOut(float dur = 0) {
-            ClearRoutine(dutchRoutine);
+            ClearRoutine(ref dutchRoutine);
             dutchRoutine = _closeOut(dur);
 
             StartCoroutine(dutchRoutine);
         }
         public void Offset(Vector2 off, float dur = 0) {
-            ClearRoutine(offRoutine);
+            ClearRoutine(ref offRoutine);
 
             offRoutine = _offset(off, dur);
 
@@ -85,15 +107,30 @@ namespace minyee2913.Utils {
         }
 
         IEnumerator _closeUp(float orSize, float dutch, float dur) {
+            if (!inCloseUp) {
+                // 초기 값 저장
+                orSize_d = cam.Lens.OrthographicSize;
+                dutch_d = cam.Lens.Dutch;
+
+                inCloseUp = true;
+            }
+
             if (dur > 0) {
-                float dSize = cam.Lens.OrthographicSize, dDutch = cam.Lens.Dutch;
+                float dSize = cam.Lens.OrthographicSize;
+                float dDutch = cam.Lens.Dutch;
 
-                for (int i = 1; i <= frame; i++) {
-                    cam.Lens.OrthographicSize = dSize - (dSize - orSize) / frame * i;
-                    cam.Lens.Dutch = dDutch - (dDutch - dutch) / frame * i;
+                float elapsedTime = 0f;
 
-                    yield return new WaitForSeconds(dur / frame);
+                while (elapsedTime < dur) {
+                    float t = elapsedTime / dur; // 보간 값 계산
+                    cam.Lens.OrthographicSize = Mathf.Lerp(dSize, orSize, t);
+                    cam.Lens.Dutch = Mathf.Lerp(dDutch, dutch, t);
+
+                    elapsedTime += Time.deltaTime;
+                    yield return null; // 다음 프레임을 기다림
                 }
+
+                
             }
 
             cam.Lens.OrthographicSize = orSize;
@@ -102,42 +139,106 @@ namespace minyee2913.Utils {
             dutchRoutine = null;
         }
 
+        IEnumerator _viewUp(float fov, float dutch, float dur) {
+            if (!inViewUp) {
+                // 초기 값 저장
+                view_d = cam.Lens.FieldOfView;
+                dutch_view_d = cam.Lens.Dutch;
+
+                inViewUp = true;
+            }
+
+            if (dur > 0) {
+                float dSize = cam.Lens.FieldOfView;
+                float dDutch = cam.Lens.Dutch;
+
+                float elapsedTime = 0f;
+
+                while (elapsedTime < dur) {
+                    float t = elapsedTime / dur; // 보간 값 계산
+                    cam.Lens.FieldOfView = Mathf.Lerp(dSize, fov, t);
+                    cam.Lens.Dutch = Mathf.Lerp(dDutch, dutch, t);
+
+                    elapsedTime += Time.deltaTime;
+                    yield return null; // 다음 프레임을 기다림
+                }
+            }
+
+            cam.Lens.FieldOfView = fov;
+            cam.Lens.Dutch = dutch;
+
+            dutchRoutine = null;
+        }
+
+        IEnumerator _viewOut(float dur) {
+            if (dur > 0) {
+                float dSize = cam.Lens.FieldOfView;
+                float dDutch = cam.Lens.Dutch;
+
+                float elapsedTime = 0f;
+
+                while (elapsedTime < dur) {
+                    float t = elapsedTime / dur; // 보간 값 계산
+                    cam.Lens.FieldOfView = Mathf.Lerp(dSize, view_d, t);
+                    cam.Lens.Dutch = Mathf.Lerp(dDutch, dutch_view_d, t);
+
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
+                }
+            }
+
+            cam.Lens.FieldOfView = view_d;
+            cam.Lens.Dutch = dutch_view_d;
+
+            inViewUp = false;
+            dutchRoutine = null;
+        }
+
         IEnumerator _closeOut(float dur) {
             if (dur > 0) {
-                float dSize = cam.Lens.OrthographicSize, dDutch = cam.Lens.Dutch;
+                float dSize = cam.Lens.OrthographicSize;
+                float dDutch = cam.Lens.Dutch;
 
-                for (int i = 1; i <= frame; i++) {
-                    cam.Lens.OrthographicSize = dSize + (orSize_d - dSize) / frame * i;
-                    cam.Lens.Dutch = dDutch + (dutch_d - dDutch) / frame * i;
+                float elapsedTime = 0f;
 
-                    yield return new WaitForSeconds(dur / frame);
+                while (elapsedTime < dur) {
+                    float t = elapsedTime / dur; // 보간 값 계산
+                    cam.Lens.OrthographicSize = Mathf.Lerp(dSize, orSize_d, t);
+                    cam.Lens.Dutch = Mathf.Lerp(dDutch, dutch_d, t);
+
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
                 }
             }
             
             cam.Lens.OrthographicSize = orSize_d;
             cam.Lens.Dutch = dutch_d;
 
+            inCloseUp = false;
+
             dutchRoutine = null;
         }
 
         IEnumerator _offset(Vector3 off, float dur = 0) {
             if (dur > 0) {
-                Vector2 beforeOff = offset.Offset;
+                Vector3 beforeOff = offset.Offset;
 
-                for (int i = 1; i <= frame; i++) {
-                    offset.Offset = new Vector3(
-                        beforeOff.x - (beforeOff.x - off.x) / frame * i,
-                        beforeOff.y - (beforeOff.y - off.y) / frame * i
-                    );
+                float elapsedTime = 0f;
 
-                    yield return new WaitForSeconds(dur / frame);
+                while (elapsedTime < dur) {
+                    float t = elapsedTime / dur;
+                    offset.Offset = Vector3.Lerp(beforeOff, off, t);
+
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
                 }
-            }
 
-            offset.Offset = off;
+                offset.Offset = off;
+            }
 
             offRoutine = null;
         }
+
 
         IEnumerator _shake(float strength, float dur)
         {

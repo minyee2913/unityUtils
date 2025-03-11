@@ -12,4 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 458fa4e622cad7c4593f274aa470bc06, type: 3}
   m_Name: defaultConstructor
   m_EditorClassIdentifier: 
-  fields: []
+  fields:
+  - key: attackDamage
+    defaultValue: 0
+  - key: defense
+    defaultValue: 0
+  - key: critMultiple
+    defaultValue: 50
+  - key: crit
+    defaultValue: 3
