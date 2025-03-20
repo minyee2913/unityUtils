@@ -4,7 +4,18 @@ using UnityEngine;
 namespace minyee2913.Utils {
     public abstract class UIBasePanel : MonoBehaviour
     {
+        #region STATIC
         static List<UIBasePanel> opened = new();
+        public static int PanelCount => opened.Count;
+        public static UIBasePanel GetUppestPanel() {
+            if (opened.Count >= 1) {
+                return opened[opened.Count - 1];
+            }
+
+            return null;
+        }
+        #endregion
+
         public bool IsUppestLayer {
             get {
                 if (IsOpened) {
@@ -16,12 +27,18 @@ namespace minyee2913.Utils {
             }
         }
         public bool IsOpened => opened.Contains(this);
+
+        #region SERIALIZED
         [SerializeField]
         bool openByScale;
+        #endregion
+
+        #region PROTECTED / PRIVATE
         protected float closedScaleRate => 0;
         protected float openedScaleRate => 1;
         protected float transitionTime => 0.3f;
         Vector2 defaultScale;
+        #endregion
 
         void Awake()
         {
