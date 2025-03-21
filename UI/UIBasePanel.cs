@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 namespace minyee2913.Utils {
     public abstract class UIBasePanel : MonoBehaviour
@@ -28,22 +29,36 @@ namespace minyee2913.Utils {
         }
         public bool IsOpened => opened.Contains(this);
 
-        #region SERIALIZED
-        [SerializeField]
-        bool openByScale;
-        #endregion
-
         #region PROTECTED / PRIVATE
-        protected float closedScaleRate => 0;
-        protected float openedScaleRate => 1;
-        protected float transitionTime => 0.3f;
-        Vector2 defaultScale;
+        protected virtual bool openByScale => true;
+        protected virtual bool closeByEscape => true;
+        protected virtual float closedScaleRate => 0;
+        protected virtual float openedScaleRate => 1;
+        protected virtual float transitionTime => 0.3f;
+        Vector3 defaultScale;
         #endregion
+        [SerializeField]
+        bool Opened;
 
         void Awake()
         {
             defaultScale = transform.localScale;
         }
+
+        void Update()
+        {
+            if (IsOpened && closeByEscape && IsUppestLayer) {
+                if (Input.GetKeyDown(KeyCode.Escape)) {
+                    Close();
+                }
+            }
+
+            Opened = IsOpened;
+
+            PanelUpdate();
+        }
+
+        protected virtual void PanelUpdate() {}
 
         public static void CloseAll() {
             foreach (UIBasePanel panel in opened) {
@@ -53,7 +68,7 @@ namespace minyee2913.Utils {
 
         public virtual void Open() {
             if (openByScale) {
-                LeanTween.scale(gameObject, defaultScale, transitionTime).setEase(LeanTweenType.easeOutCirc);
+                transform.DOScale(defaultScale * openedScaleRate, transitionTime).SetEase(Ease.OutCirc);
             } else {
                 gameObject.SetActive(true);
             }
@@ -63,7 +78,7 @@ namespace minyee2913.Utils {
 
         public virtual void Close() {
             if (openByScale) {
-                LeanTween.scale(gameObject, defaultScale * closedScaleRate, transitionTime).setEase(LeanTweenType.easeOutCirc);
+                transform.DOScale(defaultScale * closedScaleRate, transitionTime).SetEase(Ease.OutCirc);
             } else {
                 gameObject.SetActive(false);
             }
