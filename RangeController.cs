@@ -19,6 +19,7 @@ namespace minyee2913.Utils {
         [SerializeField]
         Transform origin;
         public List<TargetRange> ranges = new();
+        public float castMaxRange = 100f;
         public TargetRange GetRange(string name) {
             return ranges.Find((r)=>r.Name == name);
         }
@@ -30,9 +31,9 @@ namespace minyee2913.Utils {
             List<Transform> targets = new();
 
             if (range.shape == RangeShape.Cube) {
-                hit = Physics.BoxCastAll(transform.position + offset, range.size, Vector3.up, Quaternion.identity, Mathf.Infinity, mask);
+                hit = Physics.BoxCastAll(transform.position + offset, range.size, Vector3.up, Quaternion.identity, castMaxRange, mask);
             } else if (range.shape == RangeShape.Sphere) {
-                hit = Physics.SphereCastAll(transform.position + offset, range.size.x, Vector3.up, Mathf.Infinity, mask);
+                hit = Physics.SphereCastAll(transform.position + offset, range.size.x, Vector3.up, castMaxRange, mask);
             }
 
             foreach (RaycastHit _hit in hit) {
