@@ -24,16 +24,16 @@ namespace minyee2913.Utils {
             return ranges.Find((r)=>r.Name == name);
         }
 
-        public List<Transform> GetHitInRange(TargetRange range, LayerMask mask) {
+            public List<Transform> GetHitInRangeFreely(Vector3 center, TargetRange range, LayerMask mask) {
             Vector3 offset = new Vector3(range.offset.x * -origin.localScale.x, range.offset.y, range.offset.z);
 
             RaycastHit[] hit = {};
             List<Transform> targets = new();
 
             if (range.shape == RangeShape.Cube) {
-                hit = Physics.BoxCastAll(transform.position + offset, range.size, Vector3.up, Quaternion.identity, castMaxRange, mask);
+                hit = Physics.BoxCastAll(center + offset, range.size, Vector3.up, Quaternion.identity, castMaxRange, mask);
             } else if (range.shape == RangeShape.Sphere) {
-                hit = Physics.SphereCastAll(transform.position + offset, range.size.x, Vector3.up, castMaxRange, mask);
+                hit = Physics.SphereCastAll(center + offset, range.size.x, Vector3.up, castMaxRange, mask);
             }
 
             foreach (RaycastHit _hit in hit) {
@@ -44,6 +44,10 @@ namespace minyee2913.Utils {
             }
 
             return targets;
+        }
+
+        public List<Transform> GetHitInRange(TargetRange range, LayerMask mask) {
+            return GetHitInRangeFreely(transform.position, range, mask);
         }
 
         void OnDrawGizmos()
