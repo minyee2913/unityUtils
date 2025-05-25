@@ -47,11 +47,16 @@ namespace minyee2913.Utils {
 
         void Start() {
             effectors.Add(this);
+            noise.AmplitudeGain = 0;
+            noise.FrequencyGain = 0;
         }
 
         void OnDisable()
         {
             effectors.Remove(this);
+            
+            noise.AmplitudeGain = 0;
+            noise.FrequencyGain = 0;
         }
 
         void ClearRoutine(ref IEnumerator routine) {

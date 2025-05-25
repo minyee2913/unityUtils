@@ -30,9 +30,7 @@ namespace minyee2913.Utils {
             return useForward ? transform.TransformDirection(localOffset) : localOffset;
         }
 
-        public List<Transform> GetHitInRange(TargetRange range, LayerMask mask) {
-            Vector3 offset = GetWorldOffset(range.offset);
-            Vector3 center = transform.position + offset;
+            public List<Transform> GetHitInRangeFreely(Vector3 center, TargetRange range, LayerMask mask) {
             Quaternion rotation = useForward ? transform.rotation : Quaternion.identity;
 
             Collider[] colliders = null;
@@ -52,6 +50,11 @@ namespace minyee2913.Utils {
             }
 
             return targets;
+        }
+        public List<Transform> GetHitInRange(TargetRange range, LayerMask mask) {
+            Vector3 offset = GetWorldOffset(range.offset);
+            Vector3 center = transform.position + offset;
+            return GetHitInRangeFreely(center, range, mask);
         }
 
         void OnDrawGizmos() {
