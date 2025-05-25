@@ -45,7 +45,6 @@ namespace minyee2913.Utils {
 
             return targets;
         }
-
         public List<Transform> GetHitInRange(TargetRange range, LayerMask mask) {
             return GetHitInRangeFreely(transform.position, range, mask);
         }
