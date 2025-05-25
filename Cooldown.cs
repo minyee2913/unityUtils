@@ -1,7 +1,8 @@
 using System;
+using UnityEngine;
 
 namespace minyee2913.Utils {
-    class Cooldown {
+    public class Cooldown {
         bool isIn;
         public float time;
         public DateTime startTime;
@@ -16,14 +17,18 @@ namespace minyee2913.Utils {
         }
 
         public float timeLeft() {
-            var t = startTime.AddMilliseconds(time * 1000);
-            DateTime now = DateTime.Now;
-            return (float)(t.Millisecond - now.Millisecond) / 1000;
+            if (!isIn) return 0f;
+
+            DateTime endTime = startTime.AddSeconds(time);
+            TimeSpan remaining = endTime - DateTime.Now;
+
+            return Mathf.Max(0f, (float)remaining.TotalSeconds);
         }
 
         public bool IsIn() {
             if (isIn) {
                 if (startTime.AddSeconds(time) < DateTime.Now) {
+                    isIn = false;
                     return false;
                 } else {
                     return true;

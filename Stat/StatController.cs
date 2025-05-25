@@ -17,6 +17,12 @@ namespace minyee2913.Utils {
         public float value;
     }
 
+    [System.Serializable]
+    public struct StatDisplay {
+        public string Key;
+        public float Value;
+    }
+
     public class StatController : MonoBehaviour
     {
         [SerializeField]
@@ -28,6 +34,9 @@ namespace minyee2913.Utils {
         [SerializeField]
         List<StatBaseField> overrideFields;
 
+        [SerializeField]
+        List<StatDisplay> display = new();
+
         void Awake()
         {
             if (constructor == null)
@@ -36,20 +45,34 @@ namespace minyee2913.Utils {
             ConstructBase(constructor);
         }
 
+        void FixedUpdate()
+        {
+            display.Clear();
+            foreach (KeyValuePair<string, float> pair in statResult)
+            {
+                display.Add(new StatDisplay() { Key = pair.Key, Value = pair.Value });
+            }
+        }
+
         void LoadDefaultConstructor() {
             string path = "StatBase/defaultConstructor";
 
             constructor = Resources.Load<StatBaseConstructor>(path);
         }
 
-        public void ConstructBase(StatBaseConstructor constructor) {
-            foreach (StatBaseField field in constructor.fields) {
+        public void ConstructBase(StatBaseConstructor constructor)
+        {
+            foreach (StatBaseField field in constructor.fields)
+            {
                 statBase[field.key] = field.defaultValue;
             }
 
-            foreach (StatBaseField field in overrideFields) {
+            foreach (StatBaseField field in overrideFields)
+            {
                 statBase[field.key] = field.defaultValue;
             }
+
+            statResult = statBase;
         }
 
         public Buf GetBuf(string key) {
@@ -102,7 +125,7 @@ namespace minyee2913.Utils {
                 }
             }
 
-            value *= 1 + per/100;
+            value *= 1 + per / 100;
 
             statResult[key] = value;
 

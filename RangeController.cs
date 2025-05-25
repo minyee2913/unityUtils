@@ -18,47 +18,62 @@ namespace minyee2913.Utils {
     public class RangeController : MonoBehaviour {
         [SerializeField]
         Transform origin;
+
+        public bool useForward;
         public List<TargetRange> ranges = new();
-        public float castMaxRange = 100f;
         public TargetRange GetRange(string name) {
-            return ranges.Find((r)=>r.Name == name);
+            return ranges.Find((r) => r.Name == name);
+        }
+
+        Vector3 GetWorldOffset(Vector3 rawOffset) {
+            Vector3 localOffset = new Vector3(rawOffset.x * -origin.localScale.x, rawOffset.y, rawOffset.z);
+            return useForward ? transform.TransformDirection(localOffset) : localOffset;
         }
 
         public List<Transform> GetHitInRange(TargetRange range, LayerMask mask) {
-            Vector3 offset = new Vector3(range.offset.x * -origin.localScale.x, range.offset.y, range.offset.z);
+            Vector3 offset = GetWorldOffset(range.offset);
+            Vector3 center = transform.position + offset;
+            Quaternion rotation = useForward ? transform.rotation : Quaternion.identity;
 
-            RaycastHit[] hit = {};
+            Collider[] colliders = null;
             List<Transform> targets = new();
 
             if (range.shape == RangeShape.Cube) {
-                hit = Physics.BoxCastAll(transform.position + offset, range.size, Vector3.up, Quaternion.identity, castMaxRange, mask);
+                colliders = Physics.OverlapBox(center, range.size * 0.5f, rotation, mask);
             } else if (range.shape == RangeShape.Sphere) {
-                hit = Physics.SphereCastAll(transform.position + offset, range.size.x, Vector3.up, castMaxRange, mask);
+                colliders = Physics.OverlapSphere(center, range.size.x, mask);
             }
 
-            foreach (RaycastHit _hit in hit) {
-                if (transform == _hit.transform)
+            foreach (var col in colliders) {
+                if (col.transform == transform)
                     continue;
 
-                targets.Add(_hit.transform);
+                targets.Add(col.transform);
             }
 
             return targets;
         }
 
-        void OnDrawGizmos()
-        {
+        void OnDrawGizmos() {
+            if (origin == null) return;
 
             foreach (var range in ranges) {
                 if (range.ShowGizmos) {
                     Gizmos.color = range.GizmosColor;
 
-                    Vector3 offset = new Vector3(range.offset.x * -origin.localScale.x, range.offset.y, range.offset.z);
+                    Vector3 offset = GetWorldOffset(range.offset);
+                    Vector3 gizmoPos = transform.position + offset;
 
                     if (range.shape == RangeShape.Cube) {
-                        Gizmos.DrawWireCube(transform.position + offset, range.size);
+                        if (useForward) {
+                            Gizmos.matrix = Matrix4x4.TRS(gizmoPos, transform.rotation, Vector3.one);
+                            Gizmos.DrawWireCube(Vector3.zero, range.size);
+                            Gizmos.matrix = Matrix4x4.identity;
+                        } else {
+                            Gizmos.DrawWireCube(gizmoPos, range.size);
+                        }
                     } else if (range.shape == RangeShape.Sphere) {
-                        Gizmos.DrawWireSphere(transform.position + offset, range.size.x);
+                        Gizmos.DrawWireSphere(gizmoPos, range.size.x);
                     }
                 }
             }
