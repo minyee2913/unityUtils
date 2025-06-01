@@ -28,6 +28,7 @@ namespace minyee2913.Utils
         public float Value;
     }
 
+    [ExecuteAlways]
     public class StatController : MonoBehaviour
     {
         [SerializeField]
@@ -39,24 +40,15 @@ namespace minyee2913.Utils
         [SerializeField]
         List<StatBaseField> overrideFields;
 
-        [SerializeField]
-        List<StatDisplay> display = new();
-
         void Awake()
         {
             if (constructor == null)
                 LoadDefaultConstructor();
-
-            ConstructBase(constructor);
         }
 
-        void FixedUpdate()
+        void Start()
         {
-            display.Clear();
-            foreach (KeyValuePair<string, float> pair in statResult)
-            {
-                display.Add(new StatDisplay() { Key = pair.Key, Value = pair.Value });
-            }
+            ConstructBase(constructor);
         }
 
         void LoadDefaultConstructor()
@@ -78,7 +70,10 @@ namespace minyee2913.Utils
                 statBase[field.key] = field.defaultValue;
             }
 
-            statResult = statBase;
+            statResult.Clear();
+            foreach (KeyValuePair<string, float> pair in statBase) {
+                statResult[pair.Key] = pair.Value;
+            }
         }
 
         public Buf GetBuf(string key)
@@ -95,6 +90,11 @@ namespace minyee2913.Utils
         {
             buf.Id = id;
             bufs[id] = buf;
+        }
+
+        public void RemoveBuf(string id)
+        {
+            bufs.Remove(id);
         }
 
         public Dictionary<string, float> GetBase()
@@ -146,7 +146,7 @@ namespace minyee2913.Utils
                 }
             }
 
-            value *= 1 + per / 100;
+            value *= 1 + per * 0.01f;
 
             statResult[key] = value;
 
@@ -162,7 +162,24 @@ namespace minyee2913.Utils
             {
                 base.OnInspectorGUI();
 
+                GUIStyle codeStyle = new GUIStyle(EditorStyles.helpBox);
+                codeStyle.font = EditorStyles.miniFont;
+                codeStyle.richText = true;
+                codeStyle.alignment = TextAnchor.MiddleLeft;
+                codeStyle.padding = new RectOffset(6, 6, 2, 2);
+                codeStyle.normal.textColor = Color.white;
+
                 StatController controller = (StatController)target;
+
+                string display = "";
+
+                foreach (KeyValuePair<string, float> pair in controller.statResult)
+                {
+                    display += "<color='orange>" + pair.Key + "</color>: " + pair.Value + "\n";
+                }
+
+                GUILayout.Label("스탯별 연산 결과");
+                GUILayout.Label(display, codeStyle);
 
                 bufFoldout = EditorGUILayout.Foldout(bufFoldout, "버프", true);
                 if (bufFoldout)
@@ -171,22 +188,15 @@ namespace minyee2913.Utils
 
                     foreach (KeyValuePair<string, Buf> pair in controller.GetBufs())
                     {
-                        string Main = pair.Key.ToUpper() + " " + pair.Value.value.ToString();
+                        string Main = pair.Key;
 
                         if (pair.Value.Comment != "")
                         {
-                            Main = pair.Value.Comment;
+                            Main += ": " + pair.Value.Comment;
                         }
 
-                        tx += Main + "\n- [" + pair.GetType().ToString() + "]" + pair.Key + ": " + pair.Value.ToString() + "\n";
+                        tx += "<color='aqua'>" + Main + "</color>\n- [" + pair.Value.mathType.ToString() + "]" + pair.Value.key + ": " + pair.Value.value.ToString() + "\n";
                     }
-
-                    GUIStyle codeStyle = new GUIStyle(EditorStyles.helpBox);
-                    codeStyle.font = EditorStyles.miniFont; // 혹은 `EditorStyles.label.font`으로
-                    codeStyle.richText = true;
-                    codeStyle.alignment = TextAnchor.MiddleLeft;
-                    codeStyle.padding = new RectOffset(6, 6, 2, 2);
-                    codeStyle.normal.textColor = Color.white;
 
                     if (tx == "")
                     {
@@ -198,26 +208,51 @@ namespace minyee2913.Utils
                     if (GUILayout.Button("버프 추가"))
                     {
                         Rect buttonRect = GUILayoutUtility.GetLastRect();
-                        PopupWindow.Show(buttonRect, new AddBufPopup());
+                        PopupWindow.Show(buttonRect, new AddBufPopup(controller));
+                    }
+                    if (GUILayout.Button("버프 제거"))
+                    {
+                        Rect buttonRect = GUILayoutUtility.GetLastRect();
+                        PopupWindow.Show(buttonRect, new RemoveBufPopup(controller));
+                    }
+                    if (GUILayout.Button("버프 초기화"))
+                    {
+                        controller.bufs.Clear();
+                        controller.statResult.Clear();
+                        foreach (KeyValuePair<string, float> pair in controller.statBase) {
+                            controller.statResult[pair.Key] = pair.Value;
+                        }
                     }
                 }
             }
-            
+
             public class AddBufPopup : PopupWindowContent
             {
-                string key, comment;
+                string key, comment, id;
                 string value;
                 float floatVal;
+                StatController controller;
+                StatMathType mathType;
+
+                public AddBufPopup(StatController _control)
+                {
+                    controller = _control;
+                }
                 public override Vector2 GetWindowSize()
                 {
-                    return new Vector2(200, 100);
+                    return new Vector2(400, 300);
                 }
 
                 public override void OnGUI(Rect rect)
                 {
                     GUILayout.Label("추가할 버프 정보 설정", EditorStyles.boldLabel);
                     comment = EditorGUILayout.TextField("Comment", comment);
+                    id = EditorGUILayout.TextField("Id", id);
                     key = EditorGUILayout.TextField("Key", key);
+                    mathType = (StatMathType)EditorGUILayout.EnumFlagsField("Math", mathType);
+
+                    int validBits = (int)(StatMathType.Add | StatMathType.Increase | StatMathType.Remove | StatMathType.Decrease);
+                    mathType = (StatMathType)((int)mathType & validBits);
                     value = EditorGUILayout.TextField("value", value);
 
                     if (float.TryParse(value, out float parsed))
@@ -230,6 +265,54 @@ namespace minyee2913.Utils
                         EditorGUILayout.HelpBox("올바른 숫자가 아닙니다.", MessageType.Warning);
                     }
 
+                    if (GUILayout.Button("추가"))
+                    {
+                        controller.AddBuf(id, new Buf()
+                        {
+                            key = key,
+                            Comment = comment,
+                            value = floatVal,
+                            mathType = mathType,
+                        });
+                        controller.Calc(key);
+                        editorWindow.Close();
+                    }
+
+                    if (GUILayout.Button("닫기"))
+                    {
+                        editorWindow.Close();
+                    }
+                }
+            }
+            public class RemoveBufPopup : PopupWindowContent
+            {
+                string id;
+                StatController controller;
+
+                public RemoveBufPopup(StatController _control)
+                {
+                    controller = _control;
+                }
+                public override Vector2 GetWindowSize()
+                {
+                    return new Vector2(300, 200);
+                }
+
+                public override void OnGUI(Rect rect)
+                {
+                    GUILayout.Label("제거할 버프", EditorStyles.boldLabel);
+                    id = EditorGUILayout.TextField("Id", id);
+
+                    if (GUILayout.Button("제거"))
+                    {
+                        Buf bf = controller.GetBuf(id);
+                        if (bf != null)
+                        {
+                            controller.RemoveBuf(id);
+                            controller.Calc(bf.key);
+                        }
+                        editorWindow.Close();
+                    }
 
                     if (GUILayout.Button("닫기"))
                     {
@@ -238,7 +321,7 @@ namespace minyee2913.Utils
                 }
             }
         }
-        #endif
+#endif
     }
 
 }
