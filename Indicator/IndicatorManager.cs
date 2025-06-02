@@ -19,7 +19,18 @@ namespace minyee2913.Utils {
                 LoadDefaultSetting();
         }
 
-        public void LoadDefaultSetting() {
+        void Start()
+        {
+            textPoolings.Clear();
+
+            foreach (Transform child in transform)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        public void LoadDefaultSetting()
+        {
             string path = "IndicatorSettings/defaultSetting";
 
             setting = Resources.Load<IndicatorSetting>(path);
@@ -47,6 +58,7 @@ namespace minyee2913.Utils {
 
             indicator.message = text;
             indicator.color = color;
+            indicator.pos = position;
             indicator.transform.position = position;
 
             indicator.onTimeEnd = TextDispose;

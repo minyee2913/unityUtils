@@ -9,15 +9,19 @@ namespace minyee2913.Utils {
         IndicatorSetting setting;
         public string message;
         public Color color;
+        public Vector3 pos;
         float time;
         bool alive;
         TMP_Text text;
         public Action<TextIndicator> onTimeEnd;
+        Renderer mesh;
 
         public void Active(IndicatorSetting setting)
         {
             if (text == null)
                 text = gameObject.AddComponent<TextMeshPro>();
+            if (mesh == null)
+                mesh = GetComponent<Renderer>();
 
             this.setting = setting;
             alive = true;
@@ -37,11 +41,16 @@ namespace minyee2913.Utils {
             // ✅ Transform 설정: 스케일과 위치
             text.rectTransform.localScale = Vector3.one * 0.1f; // 너무 크면 안 보임
             text.transform.localPosition = Vector3.zero;
+
+            transform.position = pos;
+
+            mesh.sortingLayerName = setting.sortingLayer;
+            mesh.sortingOrder = setting.sortOrder;
         }
 
         void Update()
         {
-            if (!alive)
+            if (!alive || !text)
                 return;
 
             text.text = message;
@@ -51,6 +60,19 @@ namespace minyee2913.Utils {
             {
                 onTimeEnd?.Invoke(this);
                 alive = false;
+            }
+
+            switch (setting.anim)
+            {
+                case IndicatorAnim.FlowUp:
+                    transform.position += new Vector3(0, setting.animScale) * Time.deltaTime;
+                    break;
+                case IndicatorAnim.FlowDown:
+                    transform.position += new Vector3(0, setting.animScale) * Time.deltaTime;
+                    break;
+                case IndicatorAnim.FlowSin:
+                    transform.position = pos + new Vector3(0, Mathf.Sin(setting.animScale * time) * setting.sinRange) * Time.deltaTime;
+                    break;
             }
 
             time += Time.deltaTime;

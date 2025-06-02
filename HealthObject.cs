@@ -5,6 +5,15 @@ using UnityEngine;
 namespace minyee2913.Utils {
     public class HealthObject : MonoBehaviour
     {
+        public enum Cause
+        {
+            None,
+            Melee,
+            Range,
+            Skill,
+            Aditional,
+            More,
+        }
         public int MaxHealth, Health;
 
         public float Rate => (float)Health / MaxHealth;
@@ -14,6 +23,7 @@ namespace minyee2913.Utils {
         public class OnDamageEv {
             public int Damage;
             public HealthObject attacker;
+            public Cause cause;
             public bool cancel;
         }
 
@@ -31,13 +41,15 @@ namespace minyee2913.Utils {
             onDeathEvents.Add(ev);
         }
 
-        public bool GetDamage(int damage, HealthObject attacker) {
+        public bool GetDamage(int damage, HealthObject attacker, Cause cause = Cause.None) {
             if (isDeath)
                 return false;
 
-            OnDamageEv ev = new(){
+            OnDamageEv ev = new()
+            {
                 Damage = damage,
-                attacker = attacker
+                attacker = attacker,
+                cause = cause,
             };
 
             foreach (var _ev in OnDamageEvents) {
