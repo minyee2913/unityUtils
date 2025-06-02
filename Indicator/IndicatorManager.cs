@@ -12,8 +12,6 @@ namespace minyee2913.Utils {
         [SerializeField]
         List<TextIndicator> textPoolings = new();
         List<TextIndicator> textIndicated = new();
-        public string test_text_message;
-        public Vector3 test_generate_position;
 
         void Awake()
         {
@@ -33,10 +31,14 @@ namespace minyee2913.Utils {
             }
 
             TextIndicator indicator;
-            if (textPoolings.Count > 0) {
+            if (textPoolings.Count > 0)
+            {
                 indicator = textPoolings[0];
                 textPoolings.Remove(indicator);
-            } else {
+                indicator.gameObject.SetActive(true);
+            }
+            else
+            {
                 GameObject obj = new("textIndicator");
                 obj.transform.SetParent(transform);
 
@@ -70,6 +72,8 @@ namespace minyee2913.Utils {
     #if UNITY_EDITOR
     [CustomEditor(typeof(IndicatorManager))]
     public class IndicatorManagerEditor : Editor {
+        string message;
+        Vector3 genPos;
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
@@ -83,9 +87,12 @@ namespace minyee2913.Utils {
             }
 
             GUILayout.Space(10);
+            message = EditorGUILayout.TextField("message", message);
+            genPos = EditorGUILayout.Vector3Field("generate Pos", genPos);
 
-            if (GUILayout.Button("generate Text")) {
-                manager.GenerateText(manager.test_text_message, manager.test_generate_position, Color.white);
+            if (GUILayout.Button("generate Text"))
+            {
+                manager.GenerateText(message, genPos, Color.white);
             }
         }
     }
