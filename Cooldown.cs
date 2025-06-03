@@ -28,7 +28,6 @@ namespace minyee2913.Utils {
         public bool IsIn() {
             if (isIn) {
                 if (startTime.AddSeconds(time) < DateTime.Now) {
-                    isIn = false;
                     return false;
                 } else {
                     return true;

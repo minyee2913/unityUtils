@@ -47,7 +47,7 @@ namespace minyee2913.Utils {
             view_d = cam.Lens.FieldOfView;
         }
 
-        void Start() {
+        void OnEnable() {
             effectors.Add(this);
             noise.AmplitudeGain = 0;
             noise.FrequencyGain = 0;
