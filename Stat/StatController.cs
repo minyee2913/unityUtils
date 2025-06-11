@@ -70,9 +70,8 @@ namespace minyee2913.Utils
                 statBase[field.key] = field.defaultValue;
             }
 
-            statResult.Clear();
             foreach (KeyValuePair<string, float> pair in statBase) {
-                statResult[pair.Key] = pair.Value;
+                Calc(pair.Key);
             }
         }
 
@@ -109,11 +108,15 @@ namespace minyee2913.Utils
 
         public float GetResultValue(string key)
         {
+            if (!statResult.ContainsKey(key))
+                return 0f;
             return statResult[key];
         }
 
         public float GetBaseValue(string key)
         {
+            if (!statBase.ContainsKey(key))
+                return 0f;
             return statBase[key];
         }
 
@@ -129,20 +132,23 @@ namespace minyee2913.Utils
 
             foreach (KeyValuePair<string, Buf> pair in bufs)
             {
+                if (pair.Value.key != key)
+                    continue;
+                    
                 switch (pair.Value.mathType)
                 {
                     case StatMathType.Add:
                         value += pair.Value.value;
-                        break;
+                        continue;
                     case StatMathType.Remove:
                         value -= pair.Value.value;
-                        break;
+                        continue;
                     case StatMathType.Increase:
                         per += pair.Value.value;
-                        break;
+                        continue;
                     case StatMathType.Decrease:
                         per -= pair.Value.value;
-                        break;
+                        continue;
                 }
             }
 

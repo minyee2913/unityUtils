@@ -13,12 +13,14 @@ namespace minyee2913.Utils {
 
         void Awake()
         {
-            for (int i = 0; i < trackSize; i++) {
+            for (int i = 0; i < trackSize; i++)
+            {
                 InstantiateTrack();
             }
         }
 
-        void InstantiateTrack() {
+        void InstantiateTrack()
+        {
             GameObject obj = new GameObject("track" + (tracks.Count + 1).ToString());
             obj.transform.SetParent(transform);
 
@@ -29,24 +31,28 @@ namespace minyee2913.Utils {
         // Update is called once per frame
         void Update()
         {
-            
+
         }
 
-        AudioClip GetClip(string sound) {
-            if (caches.ContainsKey(sound)) {
+        AudioClip GetClip(string sound)
+        {
+            if (caches.ContainsKey(sound))
+            {
                 return caches[sound];
             }
 
             AudioClip clip = Resources.Load<AudioClip>(path + sound);
 
-            if (clip != null) {
+            if (clip != null)
+            {
                 caches[sound] = clip;
             }
 
             return clip;
         }
 
-        public void PlaySound(string sound, int track, float volume = 1, float pitch = 1, bool loop = false, float startTime = 0) {
+        public void PlaySound(string sound, int track, float volume = 1, float pitch = 1, bool loop = false, float startTime = 0)
+        {
             AudioClip clip = GetClip(sound);
 
             AudioSource _audio = tracks[track - 1];
@@ -57,11 +63,19 @@ namespace minyee2913.Utils {
             _audio.pitch = pitch;
             _audio.time = startTime;
 
-            if (pitch != 0) {
+            if (pitch != 0)
+            {
                 _audio.pitch = pitch;
             }
-            
+
             _audio.Play();
+        }
+
+        public void StopTrack(int track)
+        {
+            AudioSource _audio = tracks[track - 1];
+
+            _audio.Stop();
         }
     }
 }
