@@ -88,18 +88,24 @@ namespace minyee2913.Utils {
             StartCoroutine(dutchRoutine);
         }
         public void ViewOut(float dur = 0) {
+            if (!gameObject.activeSelf)
+                return;
             ClearRoutine(ref dutchRoutine);
             dutchRoutine = _viewOut(dur);
 
             StartCoroutine(dutchRoutine);
         }
         public void CloseOut(float dur = 0) {
+            if (!gameObject.activeSelf)
+                return;
             ClearRoutine(ref dutchRoutine);
             dutchRoutine = _closeOut(dur);
 
             StartCoroutine(dutchRoutine);
         }
         public void Offset(Vector2 off, float dur = 0) {
+            if (!gameObject.activeSelf)
+                return;
             ClearRoutine(ref offRoutine);
 
             offRoutine = _offset(off, dur);
@@ -109,6 +115,8 @@ namespace minyee2913.Utils {
 
         public void Shake(float strength = 1, float dur = 0.05f)
         {
+            if (!gameObject.activeSelf)
+                return;
             StartCoroutine(_shake(strength, dur));
         }
 

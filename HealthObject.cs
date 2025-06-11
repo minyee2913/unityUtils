@@ -20,28 +20,112 @@ namespace minyee2913.Utils {
 
         public bool isDeath;
 
-        public class OnDamageEv {
+        public class OnDamageEv
+        {
             public int Damage;
             public HealthObject attacker;
             public Cause cause;
             public bool cancel;
+            public float critPer, critMultiple;
+        }
+
+        public class OnDamageFinalEv
+        {
+            public int Damage;
+            public HealthObject attacker;
+            public Cause cause;
+            public float critPer, critMultiple;
+            public bool isCrit;
+
+            public OnDamageFinalEv(OnDamageEv ev)
+            {
+                Damage = ev.Damage;
+                attacker = ev.attacker;
+                cause = ev.cause;
+                critPer = ev.critPer;
+                critMultiple = ev.critMultiple;
+            }
+        }
+
+        public class OnHealEv
+        {
+            public int value;
+            public HealthObject healer;
+            public bool cancel;
         }
 
         List<Action<OnDamageEv>> OnDamageEvents = new();
+        List<Action<OnDamageFinalEv>> OnDamageFinalEvents = new();
         List<Action<OnDamageEv>> onDeathEvents = new();
-
-        public void ResetToMax() {
-            Health = MaxHealth;
+        List<Action<OnHealEv>> onHealEvents = new();
+        StatController stat;
+        void Awake()
+        {
+            stat = GetComponent<StatController>();
         }
 
-        public void OnDamage(Action<OnDamageEv> ev) {
+        public void ResetToMax()
+        {
+            Health = MaxHealth;
+            isDeath = false;
+        }
+
+        public void ChangeMax(int maxHealth)
+        {
+            float newHealth = Rate * maxHealth;
+            MaxHealth = maxHealth;
+            Health = (int)newHealth;
+        }
+
+        public void OnDamage(Action<OnDamageEv> ev)
+        {
             OnDamageEvents.Add(ev);
         }
-        public void OnDeath(Action<OnDamageEv> ev) {
+        public void OnDamageFinal(Action<OnDamageFinalEv> ev)
+        {
+            OnDamageFinalEvents.Add(ev);
+        }
+        public void OnDeath(Action<OnDamageEv> ev)
+        {
             onDeathEvents.Add(ev);
         }
+            public void OnHeal(Action<OnHealEv> ev) {
+            onHealEvents.Add(ev);
+        }
 
-        public bool GetDamage(int damage, HealthObject attacker, Cause cause = Cause.None) {
+        public bool Heal(int val, HealthObject healer = null)
+        {
+            if (isDeath)
+                return false;
+
+            OnHealEv ev = new()
+            {
+                value = val,
+                healer = healer,
+            };
+
+            foreach (var _ev in onHealEvents)
+            {
+                _ev.Invoke(ev);
+            }
+
+            if (ev.cancel)
+            {
+                return false;
+            }
+
+            Health += ev.value;
+
+            if (Health > MaxHealth)
+            {
+                Health = MaxHealth;
+            }
+
+            return true;
+        }
+
+        public bool GetDamage(int damage, HealthObject attacker, Cause cause = Cause.None)
+        {
             if (isDeath)
                 return false;
 
@@ -52,20 +136,47 @@ namespace minyee2913.Utils {
                 cause = cause,
             };
 
-            foreach (var _ev in OnDamageEvents) {
+            if (stat != null)
+            {
+                ev.critPer = stat.GetResultValue("crit");
+                ev.critMultiple = stat.GetResultValue("critMultiple");
+            }
+
+            foreach (var _ev in OnDamageEvents)
+            {
                 _ev.Invoke(ev);
             }
 
-            if (ev.cancel) {
+            if (ev.cancel)
+            {
                 return false;
             }
 
-            Health -= ev.Damage;
+            OnDamageFinalEv final = new(ev);
 
-            if (Health <= 0) {
+            float finalDam = ev.Damage;
+
+            if (UnityEngine.Random.Range(0, 100f) <= final.critPer)
+            {
+                finalDam *= 1 + final.critMultiple * 0.01f;
+                final.isCrit = true;
+            }
+
+            final.Damage = (int)finalDam;
+
+            foreach (var _ev in OnDamageFinalEvents)
+            {
+                _ev.Invoke(final);
+            }
+
+            Health -= final.Damage;
+
+            if (Health <= 0)
+            {
                 isDeath = true;
 
-                foreach (var _ev in onDeathEvents) {
+                foreach (var _ev in onDeathEvents)
+                {
                     _ev.Invoke(ev);
                 }
             }
