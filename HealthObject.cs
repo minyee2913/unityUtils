@@ -54,6 +54,9 @@ namespace minyee2913.Utils {
             public bool cancel;
         }
 
+        [SerializeField]
+        bool SyncToStat;
+
         List<Action<OnDamageEv>> OnDamageEvents = new();
         List<Action<OnDamageFinalEv>> OnDamageFinalEvents = new();
         List<Action<OnDamageEv>> onDeathEvents = new();
@@ -62,6 +65,19 @@ namespace minyee2913.Utils {
         void Awake()
         {
             stat = GetComponent<StatController>();
+        }
+
+        void Update()
+        {
+            if (stat != null && SyncToStat)
+            {
+                int maxHealth = (int)stat.GetResultValue("maxHealth");
+
+                if (MaxHealth != maxHealth)
+                {
+                    ChangeMax(maxHealth);
+                }
+            }
         }
 
         public void ResetToMax()
