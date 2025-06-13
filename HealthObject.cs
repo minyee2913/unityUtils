@@ -28,6 +28,13 @@ namespace minyee2913.Utils {
             public bool cancel;
             public float critPer, critMultiple;
         }
+        public class OnGiveDamageEv
+        {
+            public int Damage;
+            public HealthObject target;
+            public Cause cause;
+            public float increaseDamage;
+        }
 
         public class OnDamageFinalEv
         {
@@ -58,6 +65,8 @@ namespace minyee2913.Utils {
         bool SyncToStat;
 
         List<Action<OnDamageEv>> OnDamageEvents = new();
+        List<Action<OnGiveDamageEv>> OnGiveDamageEvents = new();
+        List<Action<OnGiveDamageEv>> OnKillEvents = new();
         List<Action<OnDamageFinalEv>> OnDamageFinalEvents = new();
         List<Action<OnDamageEv>> onDeathEvents = new();
         List<Action<OnHealEv>> onHealEvents = new();
@@ -96,6 +105,14 @@ namespace minyee2913.Utils {
         public void OnDamage(Action<OnDamageEv> ev)
         {
             OnDamageEvents.Add(ev);
+        }
+        public void OnGiveDamage(Action<OnGiveDamageEv> ev)
+        {
+            OnGiveDamageEvents.Add(ev);
+        }
+        public void OnKill(Action<OnGiveDamageEv> ev)
+        {
+            OnKillEvents.Add(ev);
         }
         public void OnDamageFinal(Action<OnDamageFinalEv> ev)
         {
@@ -145,6 +162,23 @@ namespace minyee2913.Utils {
             if (isDeath)
                 return false;
 
+            if (attacker != null)
+            {
+                OnGiveDamageEv Tev = new()
+                {
+                    Damage = damage,
+                    target = this,
+                    cause = cause,
+                };
+
+                foreach (var _ev in attacker.OnGiveDamageEvents)
+                {
+                    _ev.Invoke(Tev);
+                }
+
+                damage = (int)(Tev.Damage * (1 + Tev.increaseDamage * 0.01f));
+            }
+
             OnDamageEv ev = new()
             {
                 Damage = damage,
@@ -190,6 +224,18 @@ namespace minyee2913.Utils {
             if (Health <= 0)
             {
                 isDeath = true;
+
+                OnGiveDamageEv Tev = new()
+                {
+                    Damage = damage,
+                    target = this,
+                    cause = cause,
+                };
+
+                foreach (var _ev in attacker.OnKillEvents)
+                {
+                    _ev.Invoke(Tev);
+                }
 
                 foreach (var _ev in onDeathEvents)
                 {
