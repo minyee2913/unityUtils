@@ -48,6 +48,14 @@ namespace minyee2913.Utils {
             mesh.sortingOrder = setting.sortOrder;
         }
 
+        float DeltaTime()
+        {
+            if (setting.useRealtime)
+                return Time.unscaledDeltaTime;
+            else
+                return Time.deltaTime;
+        }
+
         void Update()
         {
             if (!alive || !text)
@@ -65,17 +73,17 @@ namespace minyee2913.Utils {
             switch (setting.anim)
             {
                 case IndicatorAnim.FlowUp:
-                    transform.position += new Vector3(0, setting.animScale) * Time.deltaTime;
+                    transform.position += new Vector3(0, setting.animScale) * DeltaTime();
                     break;
                 case IndicatorAnim.FlowDown:
-                    transform.position += new Vector3(0, setting.animScale) * Time.deltaTime;
+                    transform.position += new Vector3(0, setting.animScale) * DeltaTime();
                     break;
                 case IndicatorAnim.FlowSin:
-                    transform.position = pos + new Vector3(0, Mathf.Sin(setting.animScale * time) * setting.sinRange) * Time.deltaTime;
+                    transform.position = pos + new Vector3(0, Mathf.Sin(setting.animScale * time) * setting.sinRange) * DeltaTime();
                     break;
             }
 
-            time += Time.deltaTime;
+            time += DeltaTime();
         }
     }
 }

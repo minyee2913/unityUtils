@@ -77,5 +77,19 @@ namespace minyee2913.Utils {
 
             _audio.Stop();
         }
+
+        public void PauseTrack(int track)
+        {
+            AudioSource _audio = tracks[track - 1];
+
+            _audio.Pause();
+        }
+
+        public void ResumeTrack(int track)
+        {
+            AudioSource _audio = tracks[track - 1];
+
+            _audio.UnPause();
+        }
     }
 }

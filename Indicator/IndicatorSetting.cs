@@ -20,5 +20,6 @@ namespace minyee2913.Utils {
         public float sinRange;
         public string sortingLayer;
         public int sortOrder;
+        public bool useRealtime;
     }
 }

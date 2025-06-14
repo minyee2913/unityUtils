@@ -31,6 +31,8 @@ namespace minyee2913.Utils {
         IEnumerator offRoutine = null;
         Camera camera_;
 
+        public bool useRealtime;
+
         void Awake()
         {
             cam = GetComponent<CinemachineCamera>();
@@ -45,6 +47,18 @@ namespace minyee2913.Utils {
             orSize_d = cam.Lens.OrthographicSize;
             dutch_d = dutch_view_d = cam.Lens.Dutch;
             view_d = cam.Lens.FieldOfView;
+        }
+
+        float DeltaTime()
+        {
+            if (useRealtime)
+            {
+                return Time.unscaledDeltaTime;
+            }
+            else
+            {
+                return Time.deltaTime;
+            }
         }
 
         void OnEnable() {
@@ -139,7 +153,7 @@ namespace minyee2913.Utils {
                     cam.Lens.OrthographicSize = Mathf.Lerp(dSize, orSize, t);
                     cam.Lens.Dutch = Mathf.Lerp(dDutch, dutch, t);
 
-                    elapsedTime += Time.deltaTime;
+                    elapsedTime += DeltaTime();
                     yield return null;
                 }
 
@@ -171,7 +185,7 @@ namespace minyee2913.Utils {
                     cam.Lens.FieldOfView = Mathf.Lerp(dSize, fov, t);
                     cam.Lens.Dutch = Mathf.Lerp(dDutch, dutch, t);
 
-                    elapsedTime += Time.deltaTime;
+                    elapsedTime += DeltaTime();
 
                     yield return null;
                 }
@@ -195,7 +209,7 @@ namespace minyee2913.Utils {
                     cam.Lens.FieldOfView = Mathf.Lerp(dSize, view_d, t);
                     cam.Lens.Dutch = Mathf.Lerp(dDutch, dutch_view_d, t);
 
-                    elapsedTime += Time.deltaTime;
+                    elapsedTime += DeltaTime();
 
                     yield return null;
                 }
@@ -220,7 +234,7 @@ namespace minyee2913.Utils {
                     cam.Lens.OrthographicSize = Mathf.Lerp(dSize, orSize_d, t);
                     cam.Lens.Dutch = Mathf.Lerp(dDutch, dutch_d, t);
 
-                    elapsedTime += Time.deltaTime;
+                    elapsedTime += DeltaTime();
 
                     yield return null;
                 }
@@ -244,7 +258,7 @@ namespace minyee2913.Utils {
                     float t = elapsedTime / dur;
                     offset.Offset = Vector3.Lerp(beforeOff, off, t);
 
-                    elapsedTime += Time.deltaTime;
+                    elapsedTime += DeltaTime();
                     yield return null;
                 }
 
