@@ -29,7 +29,6 @@ namespace minyee2913.Utils {
         float dutch_view_d;
         IEnumerator dutchRoutine = null;
         IEnumerator offRoutine = null;
-        Camera camera_;
 
         public bool useRealtime;
 
@@ -38,7 +37,6 @@ namespace minyee2913.Utils {
             cam = GetComponent<CinemachineCamera>();
             offset = GetComponent<CinemachineCameraOffset>();
             noise = GetComponent<CinemachineBasicMultiChannelPerlin>();
-            camera_ = GetComponent<Camera>();
 
             noise.NoiseProfile = Resources.Load<NoiseSettings>("noise_profile/6D Wobble");
             noise.AmplitudeGain = 0;

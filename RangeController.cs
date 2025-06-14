@@ -30,7 +30,7 @@ namespace minyee2913.Utils {
             return useForward ? transform.TransformDirection(localOffset) : localOffset;
         }
 
-            public List<Transform> GetHitInRangeFreely(Vector3 center, TargetRange range, LayerMask mask) {
+        public List<Transform> GetHitInRangeFreely(Vector3 center, TargetRange range, LayerMask mask) {
             Quaternion rotation = useForward ? transform.rotation : Quaternion.identity;
 
             Collider[] colliders = null;
@@ -51,10 +51,51 @@ namespace minyee2913.Utils {
 
             return targets;
         }
+
         public List<Transform> GetHitInRange(TargetRange range, LayerMask mask) {
             Vector3 offset = GetWorldOffset(range.offset);
             Vector3 center = transform.position + offset;
             return GetHitInRangeFreely(center, range, mask);
+        }
+        public List<Transform> GetHitInRangeFreely2D(Vector3 center3D, TargetRange range, LayerMask mask)
+        {
+            Vector2 center = (Vector2)center3D; // z 제거
+            List<Transform> targets = new();
+            Collider2D[] colliders = null;
+
+            float angle = useForward ? transform.eulerAngles.z : 0f;
+
+            if (range.shape == RangeShape.Cube)
+            {
+                Vector2 boxSize = new Vector2(range.size.x, range.size.y);
+                colliders = Physics2D.OverlapBoxAll(center, boxSize, angle, mask);
+            }
+            else if (range.shape == RangeShape.Sphere)
+            {
+                colliders = Physics2D.OverlapCircleAll(center, range.size.x, mask);
+            }
+
+            if (colliders == null)
+            {
+                Debug.LogWarning("No colliders detected — Check Z=0, LayerMask, and Collider2D presence.");
+                return targets;
+            }
+
+            foreach (var col in colliders)
+            {
+                if (col.transform == transform)
+                    continue;
+
+                targets.Add(col.transform);
+            }
+
+            return targets;
+        }
+
+        public List<Transform> GetHitInRange2D(TargetRange range, LayerMask mask) {
+            Vector3 offset = GetWorldOffset(range.offset);
+            Vector3 center = transform.position + offset;
+            return GetHitInRangeFreely2D(center, range, mask);
         }
 
         void OnDrawGizmos() {

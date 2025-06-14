@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Text;
 using UnityEngine;
 
 namespace minyee2913.Utils
@@ -26,6 +27,26 @@ namespace minyee2913.Utils
             }
 
             objTransform.position = target;
+        }
+
+        public static string InsertLineBreaks(string input, int maxCharsPerLine)
+        {
+            StringBuilder sb = new StringBuilder();
+            int count = 0;
+
+            foreach (char c in input)
+            {
+                sb.Append(c);
+                count++;
+
+                if (count >= maxCharsPerLine && char.IsWhiteSpace(c))
+                {
+                    sb.Append('\n');
+                    count = 0;
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }

@@ -5,7 +5,7 @@ namespace minyee2913.Utils {
     public class SoundManager : Singleton<SoundManager>
     {
         const string path = "Sounds/";
-        public const int trackSize = 4;
+        public int trackSize = 4;
 
         Dictionary<string, AudioClip> caches = new();
         [SerializeField]
