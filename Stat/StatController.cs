@@ -120,6 +120,15 @@ namespace minyee2913.Utils
             return statBase[key];
         }
 
+        public void ResetStat()
+        {
+            bufs.Clear();
+            statResult.Clear();
+            foreach (KeyValuePair<string, float> pair in statBase) {
+                statResult[pair.Key] = pair.Value;
+            }
+        }
+
         public float Calc(string key)
         {
             float value = 0;
@@ -134,7 +143,7 @@ namespace minyee2913.Utils
             {
                 if (pair.Value.key != key)
                     continue;
-                    
+
                 switch (pair.Value.mathType)
                 {
                     case StatMathType.Add:
@@ -223,11 +232,7 @@ namespace minyee2913.Utils
                     }
                     if (GUILayout.Button("버프 초기화"))
                     {
-                        controller.bufs.Clear();
-                        controller.statResult.Clear();
-                        foreach (KeyValuePair<string, float> pair in controller.statBase) {
-                            controller.statResult[pair.Key] = pair.Value;
-                        }
+                        controller.ResetStat();
                     }
                 }
             }
