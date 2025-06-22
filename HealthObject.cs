@@ -95,6 +95,12 @@ namespace minyee2913.Utils {
             isDeath = false;
         }
 
+        public void Kill()
+        {
+            Health = 0;
+            isDeath = true;
+        }
+
         public void ChangeMax(int maxHealth)
         {
             float newHealth = Rate * maxHealth;
