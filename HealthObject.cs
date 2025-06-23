@@ -163,10 +163,10 @@ namespace minyee2913.Utils {
             return true;
         }
 
-        public bool GetDamage(int damage, HealthObject attacker, Cause cause = Cause.None)
+        public int GetDamage(int damage, HealthObject attacker, Cause cause = Cause.None)
         {
             if (isDeath)
-                return false;
+                return -1;
 
             if (attacker != null)
             {
@@ -205,7 +205,7 @@ namespace minyee2913.Utils {
 
             if (ev.cancel)
             {
-                return false;
+                return -1;
             }
 
             OnDamageFinalEv final = new(ev);
@@ -249,7 +249,7 @@ namespace minyee2913.Utils {
                 }
             }
 
-            return true;
+            return final.Damage;
         }
     }
 }

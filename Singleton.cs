@@ -5,15 +5,19 @@ namespace minyee2913.Utils {
         private static T instance;
 
         virtual protected bool UseDontDestroyOnLoad => true;
+        public static bool ExistNow => instance != null;
 
         public static T Instance
         {
-            get {
-                if (instance == null) {
+            get
+            {
+                if (instance == null)
+                {
                     instance = (T)FindFirstObjectByType(typeof(T));
                 }
 
-                if (instance == null) {
+                if (instance == null)
+                {
                     GameObject obj = new GameObject(typeof(T).Name, typeof(T));
                     instance = obj.GetComponent<T>();
                 }
@@ -24,10 +28,16 @@ namespace minyee2913.Utils {
 
         void Awake()
         {
-            if (UseDontDestroyOnLoad) {
-                if (transform.parent != null && transform.root != null) {
+            instance = (T)FindFirstObjectByType(typeof(T));
+
+            if (UseDontDestroyOnLoad)
+            {
+                if (transform.parent != null && transform.root != null)
+                {
                     DontDestroyOnLoad(transform.root.gameObject);
-                } else {
+                }
+                else
+                {
                     DontDestroyOnLoad(gameObject);
                 }
             }

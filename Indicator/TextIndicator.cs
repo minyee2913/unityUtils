@@ -73,7 +73,7 @@ namespace minyee2913.Utils {
             if (setting.lookCamera)
             {
                 transform.LookAt(Camera.main.transform);
-                transform.Rotate(0, 0, 180);
+                transform.Rotate(180, 0, 180);
             }
 
             switch (setting.anim)
