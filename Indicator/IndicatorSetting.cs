@@ -21,5 +21,6 @@ namespace minyee2913.Utils {
         public string sortingLayer;
         public int sortOrder;
         public bool useRealtime;
+        public bool lookCamera;
     }
 }
