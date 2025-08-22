@@ -16,6 +16,7 @@ namespace minyee2913.Utils
             EditorGUILayout.Space();
 
             EditorGUILayout.BeginHorizontal();
+            
             if (GUILayout.Button("Preload All"))
             {
                 manager.PreloadAllClips();

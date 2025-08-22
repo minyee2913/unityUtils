@@ -11,13 +11,14 @@ public class LoadingController : MonoBehaviour
     [SerializeField]
     private Slider progress;
 
+    private float currentProgress = 0f; // 슬라이더 없을 때를 위한 내부 진행도
     private const float FakeLoadDuration = 1.5f;
 
     public static void LoadScene(string sceneName)
     {
         nextScene = sceneName;
         SceneManager.LoadScene("Loading");
-
+        
         Time.timeScale = 1;
     }
 
@@ -42,10 +43,18 @@ public class LoadingController : MonoBehaviour
             timer += Time.unscaledDeltaTime;
 
             if (progress != null)
+            {
                 progress.value = Mathf.Lerp(progress.value, targetProgress, 0.1f);
+            }
+            else
+            {
+                currentProgress = Mathf.Lerp(currentProgress, targetProgress, 0.1f);
+            }
 
-            // 로딩 완료되고 난 뒤의 연출 시간
-            if (load.progress >= 0.9f && progress.value >= 0.99f)
+            bool filled = (progress != null && progress.value >= 0.99f) || 
+                          (progress == null && currentProgress >= 0.99f);
+
+            if (load.progress >= 0.9f && filled)
             {
                 yield return new WaitForSecondsRealtime(FakeLoadDuration);
                 loaded = true;

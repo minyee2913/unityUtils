@@ -24,12 +24,21 @@ namespace minyee2913.Utils {
                 InstantiateTrack();
             }
 
-            if (preloadAsset == null) return;
+			if (preloadAsset != null)
+			{
+				foreach (var pair in preloadAsset.clipPaths)
+				{
+					caches[pair.key] = pair.clip;
+				}
+			}
 
-            foreach (var pair in preloadAsset.clipPaths)
-            {
-                caches[pair.key] = pair.clip;
-            }
+			foreach (var clip in caches.Values)
+			{
+				if (clip != null && clip.loadState != AudioDataLoadState.Loaded)
+				{
+					clip.LoadAudioData();
+				}
+			}
         }
 
         void InstantiateTrack()
@@ -38,6 +47,7 @@ namespace minyee2913.Utils {
             obj.transform.SetParent(transform);
 
             AudioSource source = obj.AddComponent<AudioSource>();
+			source.playOnAwake = false;
             tracks.Add(source);
         }
 
@@ -58,7 +68,11 @@ namespace minyee2913.Utils {
 
             if (clip != null)
             {
-                caches[sound] = clip;
+				caches[sound] = clip;
+				if (clip.loadState != AudioDataLoadState.Loaded)
+				{
+					clip.LoadAudioData();
+				}
             }
         }
 
@@ -126,60 +140,84 @@ namespace minyee2913.Utils {
 
         AudioClip GetClip(string sound)
         {
-            if (caches.ContainsKey(sound))
-            {
-                return caches[sound];
-            }
+			if (caches.ContainsKey(sound))
+			{
+				var cachedClip = caches[sound];
+				if (cachedClip != null && cachedClip.loadState != AudioDataLoadState.Loaded)
+				{
+					cachedClip.LoadAudioData();
+				}
+				return cachedClip;
+			}
 
             AudioClip clip = Resources.Load<AudioClip>(path + sound);
 
             if (clip != null)
             {
-                caches[sound] = clip;
+				caches[sound] = clip;
+				if (clip.loadState != AudioDataLoadState.Loaded)
+				{
+					clip.LoadAudioData();
+				}
             }
 
             return clip;
         }
 
-        public void PlaySound(string sound, int track, float volume = 1, float pitch = 1, bool loop = false, float startTime = 0)
-        {
-            AudioClip clip = GetClip(sound);
+		bool IsValidTrack(int track)
+		{
+			return track >= 1 && track <= tracks.Count;
+		}
 
-            AudioSource _audio = tracks[track - 1];
+		public void PlaySound(string sound, int track, float volume = 1, float pitch = 1, bool loop = false, float startTime = 0)
+		{
+			if (!IsValidTrack(track))
+			{
+				Debug.LogWarning($"[SoundManager] Invalid track index: {track}");
+				return;
+			}
 
-            _audio.clip = clip;
-            _audio.loop = loop;
-            _audio.volume = volume;
-            _audio.pitch = pitch;
-            _audio.time = startTime;
+			AudioClip clip = GetClip(sound);
+			if (clip == null)
+			{
+				Debug.LogWarning($"[SoundManager] AudioClip not found for key: {sound}");
+				return;
+			}
 
-            if (pitch != 0)
-            {
-                _audio.pitch = pitch;
-            }
+			AudioSource _audio = tracks[track - 1];
 
-            _audio.Play();
-        }
+			_audio.clip = clip;
+			_audio.loop = loop;
+			_audio.volume = volume;
+			_audio.pitch = pitch;
+			if (startTime > 0f)
+			{
+				float clampedStart = Mathf.Clamp(startTime, 0f, clip.length > 0f ? clip.length - 0.01f : 0f);
+				_audio.time = clampedStart;
+			}
 
-        public void StopTrack(int track)
-        {
-            AudioSource _audio = tracks[track - 1];
+			_audio.Play();
+		}
 
-            _audio.Stop();
-        }
+		public void StopTrack(int track)
+		{
+			if (!IsValidTrack(track)) return;
+			AudioSource _audio = tracks[track - 1];
+			_audio.Stop();
+		}
 
-        public void PauseTrack(int track)
-        {
-            AudioSource _audio = tracks[track - 1];
+		public void PauseTrack(int track)
+		{
+			if (!IsValidTrack(track)) return;
+			AudioSource _audio = tracks[track - 1];
+			_audio.Pause();
+		}
 
-            _audio.Pause();
-        }
-
-        public void ResumeTrack(int track)
-        {
-            AudioSource _audio = tracks[track - 1];
-
-            _audio.UnPause();
-        }
+		public void ResumeTrack(int track)
+		{
+			if (!IsValidTrack(track)) return;
+			AudioSource _audio = tracks[track - 1];
+			_audio.UnPause();
+		}
     }
 }
