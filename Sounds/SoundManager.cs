@@ -41,6 +41,11 @@ namespace minyee2913.Utils {
 			}
         }
 
+		public AudioSource GetTrack(int index)
+		{
+			return tracks[index-1];
+		}
+
         void InstantiateTrack()
         {
             GameObject obj = new GameObject("track" + (tracks.Count + 1).ToString());
@@ -218,6 +223,92 @@ namespace minyee2913.Utils {
 			if (!IsValidTrack(track)) return;
 			AudioSource _audio = tracks[track - 1];
 			_audio.UnPause();
+		}
+
+		public void PlaySoundWithFade(string sound, int track, float volume = 1, float pitch = 1, bool loop = false, float startTime = 0, float fadeTime = 1f)
+		{
+			if (!IsValidTrack(track))
+			{
+				Debug.LogWarning($"[SoundManager] Invalid track index: {track}");
+				return;
+			}
+
+			AudioClip clip = GetClip(sound);
+			if (clip == null)
+			{
+				Debug.LogWarning($"[SoundManager] AudioClip not found for key: {sound}");
+				return;
+			}
+
+			AudioSource _audio = tracks[track - 1];
+			
+			// 기존 사운드가 재생 중이면 페이드 아웃 후 새 사운드 재생
+			if (_audio.isPlaying)
+			{
+				StartCoroutine(FadeOutThenPlay(track, sound, volume, pitch, loop, startTime, fadeTime));
+			}
+			else
+			{
+				// 기존 사운드가 없으면 바로 페이드 인으로 재생
+				StartCoroutine(FadeInTrack(track, sound, volume, pitch, loop, startTime, fadeTime));
+			}
+		}
+
+		private System.Collections.IEnumerator FadeOutThenPlay(int track, string sound, float volume, float pitch, bool loop, float startTime, float fadeTime)
+		{
+			if (!IsValidTrack(track)) yield break;
+			
+			AudioSource _audio = tracks[track - 1];
+			float startVolume = _audio.volume;
+			float elapsedTime = 0f;
+
+			// 페이드 아웃
+			while (elapsedTime < fadeTime)
+			{
+				elapsedTime += Time.deltaTime;
+				_audio.volume = Mathf.Lerp(startVolume, 0f, elapsedTime / fadeTime);
+				yield return null;
+			}
+
+			_audio.Stop();
+			_audio.volume = startVolume; // 원래 볼륨으로 복원
+
+			// 페이드 아웃 완료 후 새 사운드 재생
+			yield return StartCoroutine(FadeInTrack(track, sound, volume, pitch, loop, startTime, fadeTime));
+		}
+
+		private System.Collections.IEnumerator FadeInTrack(int track, string sound, float volume, float pitch, bool loop, float startTime, float fadeTime)
+		{
+			if (!IsValidTrack(track)) yield break;
+			
+			AudioSource _audio = tracks[track - 1];
+			
+			// 새 사운드 설정
+			AudioClip clip = GetClip(sound);
+			if (clip == null) yield break;
+			
+			_audio.clip = clip;
+			_audio.loop = loop;
+			_audio.pitch = pitch;
+			if (startTime > 0f)
+			{
+				float clampedStart = Mathf.Clamp(startTime, 0f, clip.length > 0f ? clip.length - 0.01f : 0f);
+				_audio.time = clampedStart;
+			}
+
+			_audio.volume = 0f;
+			_audio.Play();
+
+			// 페이드 인
+			float elapsedTime = 0f;
+			while (elapsedTime < fadeTime)
+			{
+				elapsedTime += Time.deltaTime;
+				_audio.volume = Mathf.Lerp(0f, volume, elapsedTime / fadeTime);
+				yield return null;
+			}
+
+			_audio.volume = volume; // 정확한 타겟 볼륨으로 설정
 		}
     }
 }
