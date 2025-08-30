@@ -66,6 +66,7 @@ namespace minyee2913.Utils {
 
         List<Action<OnDamageEv>> OnDamageEvents = new();
         List<Action<OnGiveDamageEv>> OnGiveDamageEvents = new();
+        List<Action<OnGiveDamageEv>> OnGiveDamageFinalEvents = new();
         List<Action<OnGiveDamageEv>> OnKillEvents = new();
         List<Action<OnDamageFinalEv>> OnDamageFinalEvents = new();
         List<Action<OnDamageEv>> onDeathEvents = new();
@@ -115,6 +116,10 @@ namespace minyee2913.Utils {
         public void OnGiveDamage(Action<OnGiveDamageEv> ev)
         {
             OnGiveDamageEvents.Add(ev);
+        }
+        public void OnGiveDamageFinal(Action<OnGiveDamageEv> ev)
+        {
+            OnGiveDamageFinalEvents.Add(ev);
         }
         public void OnKill(Action<OnGiveDamageEv> ev)
         {
@@ -226,6 +231,21 @@ namespace minyee2913.Utils {
             }
 
             Health -= final.Damage;
+
+            if (attacker != null)
+            {
+                OnGiveDamageEv Tev = new()
+                {
+                    Damage = final.Damage,
+                    target = this,
+                    cause = final.cause,
+                };
+
+                foreach (var _ev in attacker.OnGiveDamageFinalEvents)
+                {
+                    _ev.Invoke(Tev);
+                }
+            }
 
             if (Health <= 0)
             {
