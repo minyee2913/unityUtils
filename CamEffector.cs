@@ -26,6 +26,7 @@ namespace minyee2913.Utils {
         float orSize_d;
         float view_d;
         float dutch_d;
+        float defaultDutch;
         float dutch_view_d;
         IEnumerator dutchRoutine = null;
         IEnumerator offRoutine = null;
@@ -43,8 +44,14 @@ namespace minyee2913.Utils {
             noise.FrequencyGain = 0;
 
             orSize_d = cam.Lens.OrthographicSize;
-            dutch_d = dutch_view_d = cam.Lens.Dutch;
+            dutch_d = dutch_view_d = defaultDutch = cam.Lens.Dutch;
             view_d = cam.Lens.FieldOfView;
+        }
+
+        public void ResetDutch()
+        {
+            dutch_d = defaultDutch;
+            cam.Lens.Dutch = defaultDutch;
         }
 
         float DeltaTime()
