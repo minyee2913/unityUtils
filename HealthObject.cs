@@ -171,7 +171,9 @@ namespace minyee2913.Utils {
         public int GetDamage(int damage, HealthObject attacker, Cause cause = Cause.None)
         {
             if (isDeath)
+            {
                 return -1;
+            }
 
             if (attacker != null)
             {
@@ -225,10 +227,13 @@ namespace minyee2913.Utils {
 
             final.Damage = (int)finalDam;
 
+            if (final.Damage <= 0)
+                final.Damage = 1;
+
             foreach (var _ev in OnDamageFinalEvents)
-            {
-                _ev.Invoke(final);
-            }
+                {
+                    _ev.Invoke(final);
+                }
 
             Health -= final.Damage;
 

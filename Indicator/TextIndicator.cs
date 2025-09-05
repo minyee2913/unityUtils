@@ -30,6 +30,8 @@ namespace minyee2913.Utils {
             text.font = setting.font;
             text.textWrappingMode = TextWrappingModes.NoWrap;
             text.fontSize = setting.fontScale;
+            text.richText = true;
+            
             // ✅ 렌더링이 되도록 머티리얼 설정
             if (text.font != null && text.font.material != null)
                 text.fontSharedMaterial = text.font.material;
