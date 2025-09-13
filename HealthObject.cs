@@ -263,15 +263,16 @@ namespace minyee2913.Utils {
                     cause = cause,
                 };
 
-                foreach (var _ev in attacker.OnKillEvents)
-                {
-                    _ev.Invoke(Tev);
-                }
+                if (attacker != null)
+                    foreach (var _ev in attacker.OnKillEvents)
+                    {
+                        _ev?.Invoke(Tev);
+                    }
 
                 foreach (var _ev in onDeathEvents)
-                {
-                    _ev.Invoke(ev);
-                }
+                    {
+                        _ev?.Invoke(ev);
+                    }
             }
 
             return final.Damage;
