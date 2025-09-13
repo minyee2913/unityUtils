@@ -264,10 +264,12 @@ namespace minyee2913.Utils {
                 };
 
                 if (attacker != null)
+                {
                     foreach (var _ev in attacker.OnKillEvents)
                     {
                         _ev?.Invoke(Tev);
                     }
+                }
 
                 foreach (var _ev in onDeathEvents)
                     {
