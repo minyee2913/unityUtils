@@ -67,9 +67,14 @@ namespace minyee2913.Utils {
         }
 
         public virtual void Open() {
-            if (openByScale) {
+            if (IsOpened)
+                return;
+            if (openByScale)
+            {
                 transform.DOScale(defaultScale * openedScaleRate, transitionTime).SetEase(Ease.OutCirc);
-            } else {
+            }
+            else
+            {
                 gameObject.SetActive(true);
             }
 
