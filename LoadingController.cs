@@ -59,6 +59,10 @@ public class LoadingController : MonoBehaviour
                 yield return new WaitForSecondsRealtime(FakeLoadDuration);
                 loaded = true;
                 load.allowSceneActivation = true;
+
+                if (NetworkSession.Local != null)
+                    NetworkSession.Local.EndLoading();
+                    
                 yield break;
             }
         }
