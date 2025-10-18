@@ -61,8 +61,7 @@ namespace minyee2913.Utils {
             public bool cancel;
         }
 
-        [SerializeField]
-        bool SyncToStat;
+        public bool SyncToStat;
 
         List<Action<OnDamageEv>> OnDamageEvents = new();
         List<Action<OnGiveDamageEv>> OnGiveDamageEvents = new();
@@ -133,7 +132,7 @@ namespace minyee2913.Utils {
         {
             onDeathEvents.Add(ev);
         }
-            public void OnHeal(Action<OnHealEv> ev) {
+        public void OnHeal(Action<OnHealEv> ev) {
             onHealEvents.Add(ev);
         }
 
