@@ -61,7 +61,12 @@ namespace minyee2913.Utils {
         protected virtual void PanelUpdate() {}
 
         public static void CloseAll() {
-            foreach (UIBasePanel panel in opened) {
+            List<UIBasePanel> panels = new();
+            foreach (UIBasePanel panel in opened)
+            {
+                panels.Add(panel);
+            }
+            foreach (UIBasePanel panel in panels) {
                 panel.Close();
             }
         }

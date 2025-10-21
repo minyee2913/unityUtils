@@ -14,15 +14,15 @@ namespace minyee2913.Utils {
             Aditional,
             More,
         }
-        public int MaxHealth, Health;
+        public float MaxHealth, Health;
 
-        public float Rate => (float)Health / MaxHealth;
+        public float Rate => Health / MaxHealth;
 
         public bool isDeath;
 
         public class OnDamageEv
         {
-            public int Damage;
+            public float Damage;
             public HealthObject attacker;
             public Cause cause;
             public bool cancel;
@@ -30,7 +30,7 @@ namespace minyee2913.Utils {
         }
         public class OnGiveDamageEv
         {
-            public int Damage;
+            public float Damage;
             public HealthObject target;
             public Cause cause;
             public float increaseDamage;
@@ -38,7 +38,7 @@ namespace minyee2913.Utils {
 
         public class OnDamageFinalEv
         {
-            public int Damage;
+            public float Damage;
             public HealthObject attacker;
             public Cause cause;
             public float critPer, critMultiple;
@@ -56,7 +56,7 @@ namespace minyee2913.Utils {
 
         public class OnHealEv
         {
-            public int value;
+            public float value;
             public HealthObject healer;
             public bool cancel;
         }
@@ -136,7 +136,7 @@ namespace minyee2913.Utils {
             onHealEvents.Add(ev);
         }
 
-        public bool Heal(int val, HealthObject healer = null)
+        public bool Heal(float val, HealthObject healer = null)
         {
             if (isDeath)
                 return false;
@@ -167,7 +167,7 @@ namespace minyee2913.Utils {
             return true;
         }
 
-        public int GetDamage(int damage, HealthObject attacker, Cause cause = Cause.None)
+        public float GetDamage(float damage, HealthObject attacker, Cause cause = Cause.None)
         {
             if (isDeath)
             {
