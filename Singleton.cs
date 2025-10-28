@@ -28,8 +28,13 @@ namespace minyee2913.Utils {
 
         void Awake()
         {
-            instance = (T)FindFirstObjectByType(typeof(T));
+            if (ExistNow)
+            {
+                Destroy(gameObject);
 
+                return;
+            }
+            
             if (UseDontDestroyOnLoad)
             {
                 if (transform.parent != null && transform.root != null)
@@ -41,6 +46,8 @@ namespace minyee2913.Utils {
                     DontDestroyOnLoad(gameObject);
                 }
             }
+
+            instance = (T)FindFirstObjectByType(typeof(T));
         }
     }
 }
