@@ -82,7 +82,7 @@ namespace minyee2913.Utils {
             {
                 int maxHealth = (int)stat.GetResultValue("maxHealth");
 
-                if (MaxHealth != maxHealth)
+                if (MaxHealth != maxHealth || MaxHealth == 0)
                 {
                     ChangeMax(maxHealth);
                 }

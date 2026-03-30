@@ -39,6 +39,8 @@ namespace minyee2913.Utils
         Dictionary<string, Buf> bufs = new();
         [SerializeField]
         List<StatBaseField> overrideFields;
+        [SerializeField]
+        bool debugBaseStat;
 
         void Awake()
         {
@@ -60,10 +62,11 @@ namespace minyee2913.Utils
 
         public void ConstructBase(StatBaseConstructor constructor)
         {
-            foreach (StatBaseField field in constructor.fields)
-            {
-                statBase[field.key] = field.defaultValue;
-            }
+            if (constructor != null)
+                foreach (StatBaseField field in constructor.fields)
+                {
+                    statBase[field.key] = field.defaultValue;
+                }
 
             foreach (StatBaseField field in overrideFields)
             {

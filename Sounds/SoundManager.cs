@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using UnityEngine.Audio;
+
 #if UNITY_EDITOR
 using UnityEditor;
 using System.IO;
@@ -8,9 +10,17 @@ using UnityEngine;
 namespace minyee2913.Utils {
     public class SoundManager : Singleton<SoundManager>
     {
+		[System.Serializable]
+		public struct OutputTrack
+		{
+			public List<int> index;
+			public AudioMixerGroup output;
+		}
         public AudioClipMapAsset preloadAsset;
         const string path = "Sounds/";
         public int trackSize = 4;
+		public List<OutputTrack> Outputs = new();
+		Dictionary<int, AudioMixerGroup> outputCache = new();
 
         Dictionary<string, AudioClip> caches = new();
         public IReadOnlyDictionary<string, AudioClip> AudioClipMap => caches;
@@ -19,6 +29,16 @@ namespace minyee2913.Utils {
 
         void Awake()
         {
+			for (int i = 0; i < Outputs.Count; i++)
+			{
+				OutputTrack output = Outputs[i];
+
+				for (int j = 0; j < output.index.Count; j++)
+				{
+					outputCache[output.index[j]] = output.output;
+				}
+			}
+
             for (int i = 0; i < trackSize; i++)
             {
                 InstantiateTrack();
@@ -53,6 +73,7 @@ namespace minyee2913.Utils {
 
             AudioSource source = obj.AddComponent<AudioSource>();
 			source.playOnAwake = false;
+			source.outputAudioMixerGroup = outputCache[tracks.Count+1];
             tracks.Add(source);
         }
 

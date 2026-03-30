@@ -8,6 +8,8 @@ namespace minyee2913.Utils {
     {
         [SerializeField]
         int maxSaveCount = 8;
+        [SerializeField]
+        public IndicatorEffect effect;
         public IndicatorSetting setting;
         [SerializeField]
         List<TextIndicator> textPoolings = new();
@@ -65,6 +67,11 @@ namespace minyee2913.Utils {
             indicator.Active(setting);
 
             textIndicated.Add(indicator);
+
+            if (effect != null)
+            {
+                effect.TextEffect(indicator);
+            }
 
             return indicator;
         }

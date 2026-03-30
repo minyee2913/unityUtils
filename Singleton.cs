@@ -28,13 +28,13 @@ namespace minyee2913.Utils {
 
         void Awake()
         {
-            if (ExistNow)
+            // 이미 인스턴스가 있고, 그 인스턴스가 나 자신이 아니라면만 파괴
+            if (instance != null && !ReferenceEquals(instance, this))
             {
                 Destroy(gameObject);
-
                 return;
             }
-            
+
             if (UseDontDestroyOnLoad)
             {
                 if (transform.parent != null && transform.root != null)
