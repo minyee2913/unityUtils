@@ -87,6 +87,10 @@ namespace minyee2913.Utils
         {
             return bufs;
         }
+        public bool HasBuf(string id)
+        {
+            return bufs.ContainsKey(id);
+        }
 
         public void AddBuf(string id, Buf buf)
         {
