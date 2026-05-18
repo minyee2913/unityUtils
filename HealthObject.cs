@@ -33,6 +33,7 @@ namespace minyee2913.Utils {
             public float Damage;
             public HealthObject target;
             public Cause cause;
+            public bool isCrit;
             public float increaseDamage;
         }
 
@@ -181,6 +182,7 @@ namespace minyee2913.Utils {
                     Damage = damage,
                     target = this,
                     cause = cause,
+                    isCrit = false
                 };
 
                 foreach (var _ev in attacker.OnGiveDamageEvents)
@@ -198,10 +200,10 @@ namespace minyee2913.Utils {
                 cause = cause,
             };
 
-            if (stat != null)
+            if (attacker?.stat != null)
             {
-                ev.critPer = stat.GetResultValue("crit");
-                ev.critMultiple = stat.GetResultValue("critMultiple");
+                ev.critPer = attacker.stat.GetResultValue("crit");
+                ev.critMultiple = attacker.stat.GetResultValue("critMultiple");
             }
 
             foreach (var _ev in OnDamageEvents)
@@ -242,6 +244,7 @@ namespace minyee2913.Utils {
                 {
                     Damage = final.Damage,
                     target = this,
+                    isCrit = final.isCrit,
                     cause = final.cause,
                 };
 
@@ -259,6 +262,7 @@ namespace minyee2913.Utils {
                 {
                     Damage = damage,
                     target = this,
+                    isCrit = final.isCrit,
                     cause = cause,
                 };
 
