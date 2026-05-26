@@ -16,7 +16,7 @@ namespace minyee2913.Utils {
         }
         public float MaxHealth, Health;
 
-        public float Rate => Health / MaxHealth;
+        public float Rate => MaxHealth > 0f ? Mathf.Clamp01(Health / MaxHealth) : 0f;
 
         public bool isDeath;
 
@@ -104,9 +104,16 @@ namespace minyee2913.Utils {
 
         public void ChangeMax(int maxHealth)
         {
-            float newHealth = Rate * maxHealth;
+            if (maxHealth <= 0)
+            {
+                MaxHealth = 0;
+                Health = 0;
+                return;
+            }
+
+            float ratio = MaxHealth > 0f ? Mathf.Clamp01(Health / MaxHealth) : 1f;
             MaxHealth = maxHealth;
-            Health = (int)newHealth;
+            Health = Mathf.Clamp(Mathf.RoundToInt(ratio * maxHealth), 0, maxHealth);
         }
 
         public void OnDamage(Action<OnDamageEv> ev)

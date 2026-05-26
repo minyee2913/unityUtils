@@ -14,6 +14,7 @@ namespace minyee2913.Utils
     }
     public class Buf
     {
+        public Sprite Icon;
         public string Id;
         public string Comment;
         public string key;

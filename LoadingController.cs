@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -18,7 +19,7 @@ public class LoadingController : MonoBehaviour
     {
         nextScene = sceneName;
         SceneManager.LoadScene("Loading");
-        
+
         Time.timeScale = 1;
     }
 
@@ -60,9 +61,13 @@ public class LoadingController : MonoBehaviour
                 loaded = true;
                 load.allowSceneActivation = true;
 
-                if (NetworkSession.Local != null)
+                while (!load.isDone)
+                    yield return null;
+
+                var nm = NetworkManager.Singleton;
+                if (nm != null && nm.IsClient && NetworkSession.Local != null)
                     NetworkSession.Local.EndLoading();
-                    
+
                 yield break;
             }
         }

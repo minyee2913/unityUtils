@@ -25,6 +25,19 @@ namespace minyee2913.Utils {
             return ranges.Find((r) => r.Name == name);
         }
 
+        public TargetRange ScaledRange(string name, float scale) {
+            TargetRange r = GetRange(name);
+            r.size *= scale;
+            return r;
+        }
+
+        /// <summary>Sphere: radius. Cube: max horizontal half-extent (distance check용).</summary>
+        public float RangeReach(TargetRange range) {
+            if (range.shape == RangeShape.Sphere)
+                return range.size.x;
+            return Mathf.Max(range.size.x, range.size.z) * 0.5f;
+        }
+
         Vector3 GetWorldOffset(Vector3 rawOffset) {
             Vector3 localOffset = new Vector3(rawOffset.x * -origin.localScale.x, rawOffset.y, rawOffset.z);
             return useForward ? transform.TransformDirection(localOffset) : localOffset;
