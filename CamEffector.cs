@@ -132,6 +132,23 @@ namespace minyee2913.Utils {
             StartCoroutine(offRoutine);
         }
 
+        /// <summary>영역 전개 등 timeScale=0 상태에서도 카메라·오프셋을 즉시 초기값으로 되돌린다.</summary>
+        public void SnapReset()
+        {
+            ClearRoutine(ref dutchRoutine);
+            ClearRoutine(ref offRoutine);
+
+            inCloseUp = false;
+            inViewUp = false;
+
+            cam.Lens.FieldOfView = view_d;
+            cam.Lens.OrthographicSize = orSize_d;
+            cam.Lens.Dutch = defaultDutch;
+
+            if (offset != null)
+                offset.Offset = Vector3.zero;
+        }
+
         public void Shake(float strength = 1, float dur = 0.05f)
         {
             if (!gameObject.activeSelf)

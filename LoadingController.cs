@@ -18,9 +18,16 @@ public class LoadingController : MonoBehaviour
     public static void LoadScene(string sceneName)
     {
         nextScene = sceneName;
-        SceneManager.LoadScene("Loading");
-
         Time.timeScale = 1;
+
+        if (Application.isBatchMode ||
+            (NetworkManager.Singleton != null && LanManager.IsHeadlessServer))
+        {
+            SceneManager.LoadScene(sceneName);
+            return;
+        }
+
+        SceneManager.LoadScene("Loading");
     }
 
     private void Start()
@@ -59,14 +66,15 @@ public class LoadingController : MonoBehaviour
             {
                 yield return new WaitForSecondsRealtime(FakeLoadDuration);
                 loaded = true;
+
+                // Loading 씬이 언로드되면 이 MonoBehaviour 코루틴이 중단되어 EndLoading이 호출되지 않는다.
+                // GameScene 활성화 후 LoadingSceneBridge에서 EndLoading을 보낸다.
+                LoadingSceneBridge.PrepareEndLoadingAfterScene(nextScene);
+
                 load.allowSceneActivation = true;
 
                 while (!load.isDone)
                     yield return null;
-
-                var nm = NetworkManager.Singleton;
-                if (nm != null && nm.IsClient && NetworkSession.Local != null)
-                    NetworkSession.Local.EndLoading();
 
                 yield break;
             }

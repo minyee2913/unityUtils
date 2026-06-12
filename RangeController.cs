@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace minyee2913.Utils {
@@ -43,11 +44,57 @@ namespace minyee2913.Utils {
             return useForward ? transform.TransformDirection(localOffset) : localOffset;
         }
 
+        static bool IsPlayerLayerMask(LayerMask mask) =>
+            (mask.value & LayerMask.GetMask("player")) != 0;
+
+        static bool ShouldSupplementPlayersOnServer(LayerMask mask) =>
+            IsPlayerLayerMask(mask) &&
+            LanManager.IsMulti &&
+            NetworkManager.Singleton != null &&
+            NetworkManager.Singleton.IsServer;
+
+        void SupplementPlayerTransforms(Vector3 center, TargetRange range, List<Transform> targets)
+        {
+            float reach = RangeReach(range) + 2.5f;
+            foreach (var pc in PlayerController.players)
+            {
+                if (pc == null || pc.battle == null || pc.battle.health == null)
+                    continue;
+                if (pc.battle.health.isDeath)
+                    continue;
+                if (Vector3.Distance(pc.transform.position, center) > reach)
+                    continue;
+                if (!targets.Contains(pc.transform))
+                    targets.Add(pc.transform);
+            }
+        }
+
+        public static NetworkHealthObject ResolvePlayerHealth(Transform t)
+        {
+            if (t == null)
+                return null;
+
+            var hp = t.GetComponent<NetworkHealthObject>();
+            return hp != null ? hp : t.GetComponentInParent<NetworkHealthObject>();
+        }
+
         public List<Transform> GetHitInRangeFreely(Vector3 center, TargetRange range, LayerMask mask) {
+            List<Transform> targets = new();
+
+            if ((mask.value & LayerMask.GetMask("area")) != 0)
+            {
+                PlayerBattle battle = PlayerController.Local != null ? PlayerController.Local.battle : null;
+                if (battle != null && battle.inArea && battle.areas != null)
+                {
+                    foreach (Area ar in battle.areas.QueryRange(center, range))
+                        targets.Add(ar.transform);
+                    return targets;
+                }
+            }
+
             Quaternion rotation = useForward ? transform.rotation : Quaternion.identity;
 
             Collider[] colliders = null;
-            List<Transform> targets = new();
 
             if (range.shape == RangeShape.Cube) {
                 colliders = Physics.OverlapBox(center, range.size * 0.5f, rotation, mask);
@@ -55,12 +102,19 @@ namespace minyee2913.Utils {
                 colliders = Physics.OverlapSphere(center, range.size.x, mask);
             }
 
-            foreach (var col in colliders) {
-                if (col.transform == transform)
-                    continue;
+            if (colliders != null)
+            {
+                foreach (var col in colliders)
+                {
+                    if (col.transform == transform)
+                        continue;
 
-                targets.Add(col.transform);
+                    targets.Add(col.transform);
+                }
             }
+
+            if (ShouldSupplementPlayersOnServer(mask))
+                SupplementPlayerTransforms(center, range, targets);
 
             return targets;
         }
@@ -70,6 +124,44 @@ namespace minyee2913.Utils {
             Vector3 center = transform.position + offset;
             return GetHitInRangeFreely(center, range, mask);
         }
+
+        public Vector3 GetRangeWorldCenter(TargetRange range)
+        {
+            Vector3 offset = GetWorldOffset(range.offset);
+            return transform.position + offset;
+        }
+
+        /// <summary>플레이어 타격 판정 — Physics + 헤드리스 서버 거리 폴백.</summary>
+        public List<NetworkHealthObject> GetPlayerHealthInRange(TargetRange range)
+        {
+            var result = new List<NetworkHealthObject>();
+            var seen = new HashSet<NetworkHealthObject>();
+
+            foreach (var t in GetHitInRange(range, LayerMask.GetMask("player")))
+            {
+                var hp = ResolvePlayerHealth(t);
+                if (hp != null && seen.Add(hp))
+                    result.Add(hp);
+            }
+
+            return result;
+        }
+
+        public List<NetworkHealthObject> GetPlayerHealthInRangeFreely(Vector3 center, TargetRange range)
+        {
+            var result = new List<NetworkHealthObject>();
+            var seen = new HashSet<NetworkHealthObject>();
+
+            foreach (var t in GetHitInRangeFreely(center, range, LayerMask.GetMask("player")))
+            {
+                var hp = ResolvePlayerHealth(t);
+                if (hp != null && seen.Add(hp))
+                    result.Add(hp);
+            }
+
+            return result;
+        }
+
         public List<Transform> GetHitInRangeFreely2D(Vector3 center3D, TargetRange range, LayerMask mask)
         {
             Vector2 center = (Vector2)center3D; // z 제거
