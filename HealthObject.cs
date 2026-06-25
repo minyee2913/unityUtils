@@ -13,6 +13,7 @@ namespace minyee2913.Utils {
             Skill,
             Aditional,
             More,
+            NoIncrease,
         }
         public float MaxHealth, Health;
 
@@ -197,7 +198,8 @@ namespace minyee2913.Utils {
                     _ev.Invoke(Tev);
                 }
 
-                damage = (int)(Tev.Damage * (1 + Tev.increaseDamage * 0.01f));
+                if (cause != Cause.NoIncrease)
+                    damage = (int)(Tev.Damage * (1 + Tev.increaseDamage * 0.01f));
             }
 
             OnDamageEv ev = new()
@@ -228,7 +230,7 @@ namespace minyee2913.Utils {
 
             float finalDam = ev.Damage;
 
-            if (UnityEngine.Random.Range(0, 100f) <= final.critPer)
+            if (UnityEngine.Random.Range(0, 100f) <= final.critPer && cause != Cause.NoIncrease)
             {
                 finalDam *= 1 + final.critMultiple * 0.01f;
                 final.isCrit = true;
