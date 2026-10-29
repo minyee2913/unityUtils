@@ -39,6 +39,9 @@ namespace minyee2913.Utils {
             return Mathf.Max(range.size.x, range.size.z) * 0.5f;
         }
 
+        /// <summary>범위 offset.x 가 향하는 월드 X 부호 (+1: 오른쪽, -1: 왼쪽).</summary>
+        public float FacingSign => origin != null && origin.localScale.x > 0 ? -1f : 1f;
+
         Vector3 GetWorldOffset(Vector3 rawOffset) {
             Vector3 localOffset = new Vector3(rawOffset.x * -origin.localScale.x, rawOffset.y, rawOffset.z);
             return useForward ? transform.TransformDirection(localOffset) : localOffset;
